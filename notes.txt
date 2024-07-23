@@ -1,0 +1,48 @@
+https://github.com/staudenmeir/laravel-adjacency-list
+https://rodionoff.space/all/mysql8-in-docker/
+
+docker start mysql
+
+php artisan db:seed --class=AdminSeeder
+
+
+image inside test area
+
+
+roles
+
+admin
+qa
+tester
+
+
+
+replace collapse icon test suite
+
+new editor
+registration / users
+
+$( document ).ready(function() {
+
+});
+
+html код новых шагов находится в 4-х местах - формы создать, обновить(if,else) и в js коде case_viewer
+
+
+composer dumpautoload
+
+
+
+
+git reset --hard HEAD~1
+
+php artisan db:seed --class=AdminSeeder
+
+
+php artisan make:migration create_repositories_table
+
+php artisan make:controller UsersController
+
+php artisan make:controller RepositoryController --resource --model=Repository
+
+php artisan make:model TestPlan
