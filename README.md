@@ -1,2 +1,2 @@
 # TaskManedger
-Creat TaskManedger on QaraTMS base
+Creat TaskManager on QaraTMS base
