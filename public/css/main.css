@@ -1,0 +1,375 @@
+@import "tree.css";
+
+
+body {
+    overflow-x: hidden;
+    font-family: 'roboto', 'arial', serif;
+}
+
+:root {
+    --header_height: 56px;
+    --test_case_controls_opacity: 0;
+}
+
+/*full height*/
+.fh {
+    height: calc(100vh - var(--header_height));
+    max-height: 100vh - var(--header_height);
+    overflow: auto;
+}
+
+.fh2 {
+    height: calc(100vh - 150px);
+    max-height: calc(100vh - 150px);
+    overflow: auto;
+}
+
+h3.page_title {
+    font-family: 'roboto', sans-serif;
+    font-weight: 300;
+}
+
+a {
+    text-decoration: none;
+}
+
+/****************************************************
+* Overlay
+****************************************************/
+.overlay {
+    display: none;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    background-color: #00000038;
+}
+
+/*************************************************************************************
+* Editor
+*************************************************************************************/
+
+#editor {
+    border: 1px solid lightgray;
+    min-height: 300px
+}
+
+
+pre {
+    display: block;
+    padding: 9.5px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #333;
+    word-break: break-all;
+    word-wrap: break-word;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+code {
+   padding: 0;
+   font-size: inherit;
+   color: inherit;
+   white-space: pre-wrap;
+   background-color: transparent;
+   border-radius: 0;
+}
+
+/*.note-editable {*/
+/*    font-size: 12px !important;*/
+/*    text-align: left !important;*/
+/*}*/
+
+/*************************************************************************************
+* Image lightbox
+*************************************************************************************/
+
+#any_img_lightbox_image {
+    max-height: 90vh;
+    max-width: 90vw;
+}
+/*************************************************************************************
+* Header
+*************************************************************************************/
+
+header {
+    background: #15293e;
+    color: white;
+    height: var(--header_height);
+    max-height: var(--header_height);
+}
+
+header a{
+    color: white;
+}
+
+/*************************************************************************************
+* Sidebar
+*************************************************************************************/
+
+.sidebar {
+    background: #193654;
+    color: white !important;
+    width: 200px;
+    min-width: 200px;
+}
+
+.sidebar_project_title {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 18px;
+}
+
+/*************************************************************************************
+Scrollbar
+*************************************************************************************/
+
+::-webkit-scrollbar {
+    height: 6px;
+    width: 7px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(27, 27, 27, .4);
+    border-radius: 5px;
+}
+::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(0,0,0,0);
+}
+
+/*************************************************************************************
+* Repository - TEST SUITES / CASES TREE / CASE EDITOR
+*************************************************************************************/
+
+/****************************************************
+* Suites Tree
+****************************************************/
+
+#suites_tree_col {
+    height: calc(100vh - var(--header_height));
+    background:  #f4f6f9;
+    overflow: hidden;
+}
+
+#tree {
+    padding-bottom: 40px !important;
+}
+
+.selected {
+    border: 1px solid rgba(25, 54, 84, 0.22) !important;
+    background: #edf7fb !important;
+    border-radius: 3px;
+}
+
+/****************************************************
+* Test cases list
+****************************************************/
+#test_cases_list_col {
+    min-width: 30%;
+}
+
+#test_cases_list {
+    max-height:  calc(100vh - 120px); ;
+    overflow-y: scroll;
+}
+
+.test_case_clickable_area {
+    width: 100%;
+    cursor: pointer;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+.test_case_controls {
+    min-width: 70px;
+    padding-top: 7px;
+}
+
+.test_case:hover {
+    background: #7c87911c;
+    --test_case_controls_opacity: 1;
+}
+
+.test_case_info {
+    min-width: 140px;
+}
+
+.test_case_controls {
+    opacity: var(--test_case_controls_opacity);
+    transition: 0.3s;
+}
+
+/****************************************************
+* Test case editor area
+****************************************************/
+
+#test_case_col {
+    /*background:  #f4f6f9;*/
+    /*max-height: calc(100vh - 120px);*/
+}
+
+.test_case_editor {
+    max-height: calc(100vh - 120px);
+}
+
+#test_case_content {
+    overflow-y: auto;
+    max-height: calc(100vh - 170px)
+}
+
+#test_case_editor_footer {
+    position: absolute;
+    bottom: 10px;
+}
+
+.test_case_step {
+    max-width: 360px;
+}
+
+#test_case_content img{
+    max-width:100%;
+    max-height:100%;
+}
+
+/****************************************************
+* DOCS
+****************************************************/
+
+.doc_title {
+    max-width: 1200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.docs_tree_link {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/****************************************************
+*old
+****************************************************/
+
+
+#tree {
+    margin-left: -30px;
+    overflow-y: auto;
+    max-height: calc(100vh - 120px)
+}
+
+.tree_suite {
+    padding-left: 30px;
+}
+
+
+.tree_test_suite_content {
+    background: #d9dfe3;
+    padding-left: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.tree_suite_test_cases {
+    margin-bottom: 10px;
+}
+
+.tree_test_case_content {
+    border-bottom: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.tree_test_case_click {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    width: 90%;
+}
+
+.tree_test_case_controls {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+}
+
+.tree_test_case_content:hover {
+    background: #7c87911c;
+}
+
+.test_case_id {
+    display: inline-block;
+    width: 110px;
+}
+
+.test_suite_cbx {
+    margin-top: 10px;
+}
+
+
+.test_suites_col {
+    overflow-y: auto;
+}
+
+#test_case_block {
+    min-width: 700px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+
+[data-badge]:after {
+    background: #6c757d;
+    border-radius: 50px;
+    color: white;
+    content: attr(data-badge);
+    font-size: 11px;
+    /*margin-top: -10px;*/
+    min-width: 20px;
+    padding: 2px;
+    position: absolute;
+    text-align: center;
+    font-weight: bolder;
+    left: 2px;
+}
+
+#steps_container b {
+    font-weight: 600;
+}
+
