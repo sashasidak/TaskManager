@@ -12,6 +12,25 @@ function selectAllTestPlanCases() {
     });
 }
 
+function selectAllSmokeTestCases() {
+     $(".test_suite_cbx").each(function(index) {
+            $(this).prop('checked',false);
+        });
+
+        $(".test_case_cbx").each(function(index) {
+            $(this).prop('checked',false);
+        });
+
+        $('#test_plan_data').val('');
+
+$(".tree_test_case").each(function() {
+        // Найти элементы с нужной иконкой и их родительские чекбоксы
+        if ($(this).find('.bi-cloud-fog2').length > 0) {
+            $(this).find('.test_case_cbx').prop('checked', true);
+        }
+    });
+}
+
 function deselectAllTestPlanCases() {
     $(".test_suite_cbx").each(function(index) {
         $(this).prop('checked',false);

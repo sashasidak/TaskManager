@@ -104,6 +104,10 @@
                     <h3>Select Test Cases</h3>
 
                     <div>
+                        <button href="button" class="btn btn-outline-link" onclick="selectAllSmokeTestCases()">
+                            <i class="bi bi-check2-square"></i> Select Smoke
+                        </button>
+
                         <button href="button" class="btn btn-outline-link" onclick="selectAllTestPlanCases()">
                             <i class="bi bi-check-all"></i> Select All
                         </button>

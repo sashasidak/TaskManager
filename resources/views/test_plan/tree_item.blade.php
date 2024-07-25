@@ -26,6 +26,7 @@
 
                     <div>
                         <span>@if($testCase->automated) <i class="bi bi-robot"></i> @else <i class="bi bi-person"></i> @endif </span>
+                        <span>@if($testCase->need_on_smoke) <i class="bi bi-cloud-fog2"></i> @else <i class="bi bi-clipboard2-check"></i> @endif </span>
                         <span class="text-muted ps-2 test_case_id">{{$prefix}}-{{$testCase->id}}</span>
                         <span>{{$testCase->title}}</span>
                     </div>
