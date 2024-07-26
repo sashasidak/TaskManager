@@ -102,9 +102,6 @@
             </div>
 
     </div>
-@foreach($testCases as $testCase)
-    <span>{{ $testCase->title }}</span>
-@endforeach
 
 
 </div>
