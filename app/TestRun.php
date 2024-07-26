@@ -88,4 +88,10 @@ class TestRun extends Model
 
         $this->saveResults($currentResults);
     }
+
+    // Add the relationship to TestPlan
+    public function testPlan()
+    {
+        return $this->belongsTo(TestPlan::class);
+    }
 }

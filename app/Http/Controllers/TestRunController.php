@@ -29,7 +29,7 @@ class TestRunController extends Controller
     public function index($project_id)
     {
         $project = Project::findOrFail($project_id);
-        $testRuns = TestRun::where('project_id', $project->id)->orderBy('created_at', 'DESC')->get();
+        $testRuns = TestRun::with('testPlan')->where('project_id', $project->id)->orderBy('created_at', 'DESC')->get();
 
         return view('test_run.list_page')
             ->with('project', $project)
