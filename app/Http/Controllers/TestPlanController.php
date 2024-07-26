@@ -38,6 +38,20 @@ class TestPlanController extends Controller
      *  PAGES
      *****************************************/
 
+    public function filter(Request $request)
+    {
+        $searchTerm = $request->input('searchTerm');
+        $project = Project::findOrFail($request->project_id);
+
+        $testPlans = TestPlan::where('project_id', $project->id)
+            ->where('title', 'LIKE', '%' . $searchTerm . '%')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        return view('test_plan.partials.test_plan_list')
+            ->with('testPlans', $testPlans)
+            ->with('project', $project);
+    }
     public function index($project_id)
     {
         $project = Project::findOrFail($project_id);
