@@ -23,10 +23,11 @@ function selectAllSmokeTestCases() {
 
         $('#test_plan_data').val('');
 
-$(".tree_test_case").each(function() {
-        // Найти элементы с нужной иконкой и их родительские чекбоксы
-        if ($(this).find('.bi-cloud-fog2').length > 0) {
-            $(this).find('.test_case_cbx').prop('checked', true);
+     $(".tree_test_case").each(function() {
+        if ($(this).find(".bi-cloud-fog2").length > 0) {
+            let suiteCheckbox = $(this).find('.test_case_cbx');
+            suiteCheckbox.prop('checked', false);
+            suiteCheckbox.click();
         }
     });
 }

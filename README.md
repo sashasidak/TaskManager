@@ -1,6 +1,6 @@
-# QaraTMS - Open Source Test Management System
+# ABankTMS - Open Source Test Management System
 
-**QaraTMS** is open source test management software for managing test suites, test cases, test plans, test runs and documentation.
+**ABankTMS** is open source test management software for managing test suites, test cases, test plans, test runs and documentation.
 
 
 ## Languages and Tools:
