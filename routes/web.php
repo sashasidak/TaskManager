@@ -168,6 +168,8 @@ Route::middleware(['auth'])->group(function () {
         ->where('project_id', '[0-9]+')
         ->name("test_plan_list_page");
 
+    Route::get('/test-plans/filter', [TestPlanController::class, 'filter'])->name('test_plan_filter');
+
     Route::get('/project/{project_id}/test-plan/create', [TestPlanController::class, 'create'])
         ->where('project_id', '[0-9]+')
         ->name("test_plan_create_page");
