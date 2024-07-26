@@ -33,7 +33,7 @@
                             </div>
 
                             <div>
-                                <span class="text-muted" title="created at">{{$testRun->created_at->format('d-m-Y H:i')}} </span>
+                                <span class="text-muted" title="created at">{{$testRun->created_at->format('d-m-Y')}} </span>
                             </div>
                         </div>
 
