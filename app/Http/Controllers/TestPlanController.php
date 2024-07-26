@@ -28,7 +28,7 @@ class TestPlanController extends Controller
         $testRun->data = $testRun->getInitialData();
         $testRun->save();
 
-        $testRun->title = 'Test Run ' . $testRun->id. ' for ' . $testPlan->title;
+        $testRun->title = $testPlan->title;
         $testRun->save();
 
         return redirect()->route('test_run_show_page', [$testPlan->project_id, $testRun->id]);

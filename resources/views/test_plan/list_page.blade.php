@@ -4,9 +4,7 @@
 
     @include('layout.sidebar_nav')
 
-
     <div class="col">
-
         <div class="border-bottom my-3">
             <h3 class="page_title">
                 Test Plans
@@ -21,10 +19,8 @@
 
         <div class="row row-cols-1 row-cols-md-2 g-3">
             @foreach($testPlans as $testPlan)
-
                 <div class="col ">
                     <div class="base_block shadow-sm border h-100 rounded">
-
                         <div class="card-body d-flex justify-content-between pb-0">
                             <div>
                                 <h4 class="card-title"> {{$testPlan->title}}</h4>
@@ -40,14 +36,16 @@
 
                         @if($testPlan->description)
                             <div class="card-text text-muted ps-3">
-                               <span> {{$testPlan->description}} </span>
+                               <span>{!! preg_replace(
+                                   '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
+                                   '<a href="$0" target="_blank">$0</a>',
+                                   e($testPlan->description)
+                               ) !!}</span>
                             </div>
                         @endif
 
-
                         <div class="d-flex justify-content-end align-items-end border-top py-2">
                             <div>
-
                                 @can('add_edit_test_runs')
                                     <a href="{{route('start_new_test_run', $testPlan->id)}}" class="link-light btn btn-sm btn-success">
                                         <i class="bi bi-play-circle"></i>
@@ -63,14 +61,10 @@
                                 @endcan
                             </div>
                         </div>
-
                     </div>
                 </div>
             @endforeach
         </div>
-
     </div>
 
-
 @endsection
-

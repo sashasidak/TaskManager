@@ -33,25 +33,28 @@
                             </div>
 
                             <div>
-                                <span class="text-muted" title="created at">{{$testRun->created_at->format('d-m-Y H:i')}} </span>
+                                <span class="text-muted" title="created at">{{$testRun->created_at->format('d-m-Y')}} </span>
                             </div>
                         </div>
 
+                        @if($testRun->testPlan && $testRun->testPlan->description)
+                            <div class="card-text text-muted ps-3">
+                                <span>{!! preg_replace(
+                                   '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
+                                   '<a href="$0" target="_blank">$0</a>',
+                                   e($testRun->testPlan->description)
+                               ) !!}</span>
+                            </div>
+                        @endif
+
                         <div class="border-top p-2">
-
-
-                          @include('test_run.chart')
-
+                            @include('test_run.chart')
                         </div>
 
                     </div>
                 </div>
             @endforeach
         </div>
-
-
-
-
 
     </div>
 @endsection
