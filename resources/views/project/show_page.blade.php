@@ -19,8 +19,7 @@
         </div>
     </div>
 
-
-    <div class="row row-cols-1 row-cols-md-6 g-2 text-secondary ">
+    <div class="row row-cols-1 row-cols-md-6 g-2 text-secondary">
 
         <div class="col">
             <div class="base_block border shadow-sm rounded">
@@ -102,10 +101,16 @@
         </h3>
     </div>
 
-    <div class="row row-cols-3 g-3">
+    @can('add_edit_repositories')
+        <div class="border-bottom my-3">
+            <input type="text" id="repository_filter" class="form-control" placeholder="Filter repositories...">
+        </div>
+    @endcan
+
+    <div class="row row-cols-3 g-3" id="repositories_list">
         @foreach($repositories as $repository)
 
-            <div class="col">
+            <div class="col repository-item">
                 <div class="base_block border h-100 shadow-sm rounded">
 
                     <div class="card-body">
@@ -116,17 +121,21 @@
 
                         @if($repository->description)
                             <div class="card-text text-muted">
-                                <span> {{$repository->description}} </span>
+                                <span>{!! preg_replace(
+                                    '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
+                                    '<a href="$0" target="_blank">$0</a>',
+                                    e($repository->description)
+                                ) !!}</span>
                             </div>
                         @endif
                     </div>
 
                     <div class="d-flex justify-content-end border-top p-2">
-                            <span class="text-muted">
-                                <b>{{ $repository->suitesCount() }}</b> Test Suites
-                                 | <b>{{ $repository->casesCount() }}</b> Test Cases
-                                  | <b>{{ $repository->automatedCasesCount() }}</b> Automated
-                             </span>
+                        <span class="text-muted">
+                            <b>{{ $repository->suitesCount() }}</b> Test Suites
+                             | <b>{{ $repository->casesCount() }}</b> Test Cases
+                              | <b>{{ $repository->automatedCasesCount() }}</b> Automated
+                        </span>
                     </div>
 
                 </div>
@@ -135,11 +144,19 @@
         @endforeach
     </div>
 
-
 </div>
-
-
-
 
 @endsection
 
+@section('footer')
+    <script>
+        $(document).ready(function(){
+            $("#repository_filter").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#repositories_list .repository-item").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+@endsection
