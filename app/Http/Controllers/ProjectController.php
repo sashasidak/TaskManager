@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
+
 {
     /*****************************************
      *  PAGES
