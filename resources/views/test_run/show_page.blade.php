@@ -18,7 +18,7 @@
                     <button class="btn btn-sm btn-outline-primary me-1" id="filter-button" title="Filter">
                         <i class="bi bi-funnel"></i>
                     </button>
-                    <a href="{{ route('test_run_edit_page', [$testRun->project_id, $testRun->id]) }}"
+                    <a href="{{ route('test_plan_update_page', [$project->id, $testPlan->id]) }}"
                        class="btn btn-sm btn-outline-dark me-1"
                        title="Repository Settings">
                         <i class="bi bi-gear"></i>

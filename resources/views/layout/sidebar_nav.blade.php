@@ -15,9 +15,9 @@
                 Repositories
             </a>
 
-            <a href="{{route("test_plan_list_page", $project->id)}}" class="nav-link text-white">
-                <i class="bi bi-journals"></i> Test Plans
-            </a>
+            {{-- <a href="{{route("test_plan_list_page", $project->id)}}" class="nav-link text-white">
+                            <i class="bi bi-journals"></i> Test Plans
+                        </a>  скрыл с бокового бара когда переделал содание test_run, убрав шаги с созданием Test_plan--}}
 
 
             <a href="{{route("test_run_list_page", $project->id)}}" class="nav-link text-white">
