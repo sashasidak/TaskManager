@@ -229,7 +229,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/trcs', [TestRunController::class, 'updateCaseStatus']);
 
-    Route::post('/test-run/create', [TestRunController::class, 'store'])->name("test_run_create");
+    Route::post('/test-plan/store', [TestPlanController::class, 'store'])->name('test_plan_store');
     Route::post('/test-run/update', [TestRunController::class, 'update'])->name("test_run_update");
     Route::post('/test-run/delete', [TestRunController::class, 'destroy'])->name("test_run_delete");
 
@@ -263,26 +263,3 @@ Route::middleware(['auth'])->group(function () {
 
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
