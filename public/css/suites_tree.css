@@ -6,6 +6,19 @@
     display: block; /* Делает элемент блочным, чтобы текст переносился корректно */
 }
 
+.hidden {
+    display: none;
+}
+
+.branch-link {
+    color: blue;
+    text-decoration: underline;
+}
+
+.branch-link:hover {
+    color: darkblue;
+}
+
 *,
 ::after,
 ::before {

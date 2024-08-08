@@ -12,7 +12,7 @@
                     <i class="bi bi-arrow-right-short"></i>
                 @endforeach
             </span>
-            <span class="suite_title">{{$testSuite->title}}</span>
+            <span class="suite_title" data-title="{{$testSuite->title}}">{{$testSuite->title}}</span>
 
             {{-- Collapse/Expand Button --}}
             <button class="toggle-button" onclick="toggleTestCases(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
@@ -57,6 +57,7 @@
 
 </div>
 
+
 <script>
 function toggleTestCases(button) {
     var testCases = button.closest('.suite_header').nextElementSibling;
@@ -69,6 +70,27 @@ function toggleTestCases(button) {
     }
 }
 </script>
+
+<script>
+function shortenUrls(text) {
+    const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
+    return text.replace(urlPattern, (match, fullUrl, protocol, shortUrl) => {
+        const shortenedText = shortUrl; // Например, A24MOB-33433
+        return `<a href="${fullUrl}" class="branch-link" target="_blank">${shortenedText}</a>`;
+    });
+}
+
+function updateSuiteTitles() {
+    document.querySelectorAll('.suite_title').forEach(span => {
+        const originalTitle = span.getAttribute('data-title');
+        span.innerHTML = shortenUrls(originalTitle);
+    });
+}
+
+// Вызывайте эту функцию, чтобы обновить ссылки после загрузки страницы
+document.addEventListener('DOMContentLoaded', updateSuiteTitles);
+</script>
+
 
 <style>
 .toggle-button i {
