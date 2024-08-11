@@ -14,6 +14,11 @@
             </span>
             <span class="suite_title" data-title="{{$testSuite->title}}">{{$testSuite->title}}</span>
 
+            {{-- PDF Report Button --}}
+            <button class="pdf-button" onclick="generatePdfReport({{$project->id}}, {{$testRun->id}}, {{$testSuite->id}})" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+            </button>
+
             {{-- Collapse/Expand Button --}}
             <button class="toggle-button" onclick="toggleTestCases(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
                 <i class="bi bi-chevron-down"></i>
@@ -69,9 +74,15 @@ function toggleTestCases(button) {
         button.innerHTML = '<i class="bi bi-chevron-right"></i>';
     }
 }
-</script>
 
-<script>
+function generatePdfReport(projectId, testRunId, suiteId) {
+    if (projectId && testRunId && suiteId) {
+        window.location.href = `/project/${projectId}/test-run/${testRunId}/generate-pdf/${suiteId}`;
+    } else {
+        console.error("Project ID, Test Run ID, or Suite ID is missing");
+    }
+}
+
 function shortenUrls(text) {
     const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
     return text.replace(urlPattern, (match, fullUrl, protocol, shortUrl) => {
@@ -87,13 +98,12 @@ function updateSuiteTitles() {
     });
 }
 
-// Вызывайте эту функцию, чтобы обновить ссылки после загрузки страницы
 document.addEventListener('DOMContentLoaded', updateSuiteTitles);
 </script>
 
 
 <style>
-.toggle-button i {
+.toggle-button i, .pdf-button i {
     font-size: 16px;
     color: darkgray;
 }

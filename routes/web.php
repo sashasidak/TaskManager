@@ -10,6 +10,7 @@ use \App\Http\Controllers\RepositoryController;
 use \App\Http\Controllers\DocumentsController;
 use \App\Http\Controllers\AuthController;
 use \App\Http\Controllers\UsersController;
+use App\Http\Controllers\SuiteReportController;
 
 
 /**********************************************************************
@@ -224,6 +225,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/trchart/{test_run_id}', [TestRunController::class, 'loadChart'])
         ->where('test_run_id', '[0-9]+');
+
+    Route::get('/project/{project_id}/test-run/{test_run_id}/generate-pdf/{suite_id}', [SuiteReportController::class, 'generatePdf'])
+        ->name('generatePdf');
 
 //Update test case status in results array
 
