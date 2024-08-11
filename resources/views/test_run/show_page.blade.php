@@ -15,7 +15,7 @@
 
             @can('add_edit_test_runs')
                 <div>
-                    <button class="btn btn-sm btn-outline-primary me-1" id="filter-button" title="Filter">
+                    <button class="btn btn-sm btn-outline-dark me-1" id="filter-button" title="Filter">
                         <i class="bi bi-funnel"></i>
                     </button>
                     <a href="{{ route('test_plan_update_page', [$project->id, $testPlan->id]) }}"

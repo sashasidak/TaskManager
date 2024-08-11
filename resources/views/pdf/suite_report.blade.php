@@ -8,20 +8,24 @@
         h1, h3 {
             color: #333;
             margin-bottom: 10px;
-            font-style: italic; /* Курсивный стиль текста */
-            text-align: center; /* Центрирование заголовков */
+            font-style: italic;
+            text-align: center;
         }
         h1 {
-            font-size: 28px; /* Размер шрифта для h1 */
-            font-weight: bold; /* Жирное начертание */
+            font-size: 28px;
+            font-weight: bold;
         }
         .suite-title {
-            text-align: center; /* Центрирование заголовков секций */
-            margin-bottom: 20px; /* Отступ снизу */
-            width: 100%; /* Занимает всю ширину */
-            font-style: italic; /* Курсивный стиль текста */
-            font-size: 24px; /* Размер шрифта */
-            font-weight: bold; /* Жирное начертание */
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            font-style: italic;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .comment-section {
+            margin-bottom: 20px;
+            text-align: center;
         }
         .test-case-container {
             width: 100%;
@@ -35,7 +39,7 @@
         .test-case-container th {
             background-color: #f4f4f4;
             color: #333;
-            text-align: center; /* Центрирование текста заголовков */
+            text-align: center;
             font-size: 14px;
             border-bottom: 2px solid #ddd;
         }
@@ -44,39 +48,44 @@
             vertical-align: middle;
         }
         .test-case-title {
-            text-align: left; /* Выравнивание текста по левому краю */
+            text-align: left;
             font-weight: bold;
             font-size: 16px;
         }
         .test-case-status {
-            text-align: center; /* Центрирование статуса */
+            text-align: center;
         }
         .status-label {
             display: inline-block;
-            padding: 4px 8px; /* Уменьшены отступы */
-            border-radius: 4px; /* Уменьшен радиус скругления */
-            font-size: 12px; /* Уменьшен размер шрифта */
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: bold;
             color: #fff;
         }
         .status-passed {
-            background-color: #28a745; /* Зеленый */
+            background-color: #28a745;
         }
         .status-failed {
-            background-color: #dc3545; /* Красный */
+            background-color: #dc3545;
         }
         .status-blocked {
-            background-color: #ffc107; /* Желтый */
-            color: #333; /* Темный текст */
+            background-color: #ffc107;
+            color: #333;
         }
         .status-not-tested {
-            background-color: #6c757d; /* Серый */
+            background-color: #6c757d;
         }
         .test-case-container tr:nth-child(even) td {
-            background-color: #f9f9f9; /* Светло-серый фон для четных строк */
+            background-color: #f9f9f9;
         }
         .test-case-container tr:hover td {
-            background-color: #e9ecef; /* Цвет фона при наведении */
+            background-color: #e9ecef;
+        }
+        .divider-row {
+            background-color: #f4f4f4;
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
@@ -84,26 +93,33 @@
 
 <h1>Отчет о тестировании: {{ $project->name }}</h1>
 
-@foreach($suites as $suite)
+@if($relatedSuites->count())
+    <!-- Display only the main suite title -->
     <div class="suite-title">
-        <h3>{{ $suite->title }}</h3>
+        <h3>{{ $relatedSuites->first()->title }}</h3>
     </div>
+@endif
 
-    @if($comment)
-        <div class="comment-section">
-            <h3>Комментарий:</h3>
-            <p>{{ $comment }}</p>
-        </div>
-    @endif
-    
-    <table class="test-case-container">
-        <thead>
-        <tr>
-            <th>Test Case:</th>
-            <th>Status:</th>
+@if($comment)
+    <div class="comment-section">
+        <h3>Комментарий:</h3>
+        <p>{{ $comment }}</p>
+    </div>
+@endif
+
+<table class="test-case-container">
+    <thead>
+    <tr>
+        <th>Test Case:</th>
+        <th>Status:</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach($relatedSuites as $suite)
+        <!-- Display the suite title as a divider row -->
+        <tr class="divider-row">
+            <td colspan="2">{{ $suite->title }}</td>
         </tr>
-        </thead>
-        <tbody>
         @foreach($suite->testCases as $testCase)
             @if($testCases->contains($testCase))
                 <tr>
@@ -127,9 +143,9 @@
                 </tr>
             @endif
         @endforeach
-        </tbody>
-    </table>
-@endforeach
+    @endforeach
+    </tbody>
+</table>
 
 </body>
 </html>

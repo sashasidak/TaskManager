@@ -22,10 +22,12 @@ class SuiteReportController extends Controller
         $testCasesIds = explode(',', $testPlan->data);
         $testSuitesIds = TestCase::whereIn('id', $testCasesIds)->get()->pluck('suite_id')->toArray();
 
-        $suites = Suite::where('id', $suite_id)->get();
-        $testSuitesTree = Suite::whereIn('id', $testSuitesIds)->tree()->get()->toTree();
+        // Получение всех связанных задач и подзадач
+        $suite = Suite::findOrFail($suite_id);
+        $relatedSuites = Suite::whereIn('id', $suite->descendantsAndSelf()->pluck('id')->toArray())->get();
 
-        $testCases = TestCase::whereIn('suite_id', $suites->pluck('id'))->whereIn('id', $testCasesIds)->get();
+        // Получение всех тест-кейсов, связанных с задачами и подзадачами
+        $testCases = TestCase::whereIn('suite_id', $relatedSuites->pluck('id'))->whereIn('id', $testCasesIds)->get();
         $results = $testRun->getResults();
 
         $comment = $request->input('comment', '');
@@ -35,8 +37,7 @@ class SuiteReportController extends Controller
             'testRun' => $testRun,
             'testPlan' => $testPlan,
             'repository' => $repository,
-            'testSuitesTree' => $testSuitesTree,
-            'suites' => $suites,
+            'relatedSuites' => $relatedSuites,
             'testCases' => $testCases,
             'results' => $results,
             'comment' => $comment
@@ -45,7 +46,4 @@ class SuiteReportController extends Controller
         $pdf = SnappyPdf::loadView('pdf.suite_report', $data);
         return $pdf->download("TestRun_Report_{$testRun->id}.pdf");
     }
-
-
 }
-
