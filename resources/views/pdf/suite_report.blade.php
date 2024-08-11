@@ -88,6 +88,14 @@
     <div class="suite-title">
         <h3>{{ $suite->title }}</h3>
     </div>
+
+    @if($comment)
+        <div class="comment-section">
+            <h3>Комментарий:</h3>
+            <p>{{ $comment }}</p>
+        </div>
+    @endif
+    
     <table class="test-case-container">
         <thead>
         <tr>

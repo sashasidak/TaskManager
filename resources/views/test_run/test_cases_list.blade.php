@@ -19,6 +19,27 @@
                 <i class="bi bi-file-earmark-pdf-fill"></i>
             </button>
 
+            <!-- Modal for PDF Report -->
+            <div class="modal fade" id="pdfReportModal" tabindex="-1" aria-labelledby="pdfReportModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pdfReportModalLabel">Enter Comment for PDF Report</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="pdfReportForm">
+                                <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="submitPdfReport()">Generate PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Collapse/Expand Button --}}
             <button class="toggle-button" onclick="toggleTestCases(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
                 <i class="bi bi-chevron-down"></i>
@@ -75,12 +96,55 @@ function toggleTestCases(button) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем модальное окно
+    var pdfReportModal = document.getElementById('pdfReportModal');
+
+    // Создаем экземпляр модального окна Bootstrap
+    var modal = new bootstrap.Modal(pdfReportModal);
+
+    // Добавляем обработчик события для очистки текста при закрытии модального окна
+    pdfReportModal.addEventListener('hidden.bs.modal', function () {
+        document.getElementById('comment').value = '';
+    });
+});
+
 function generatePdfReport(projectId, testRunId, suiteId) {
     if (projectId && testRunId && suiteId) {
-        window.location.href = `/project/${projectId}/test-run/${testRunId}/generate-pdf/${suiteId}`;
+        // Показываем модальное окно
+        var modal = new bootstrap.Modal(document.getElementById('pdfReportModal'));
+        modal.show();
+
+        // Сохраняем необходимые данные в форме
+        document.getElementById('pdfReportForm').dataset.projectId = projectId;
+        document.getElementById('pdfReportForm').dataset.testRunId = testRunId;
+        document.getElementById('pdfReportForm').dataset.suiteId = suiteId;
     } else {
         console.error("Project ID, Test Run ID, or Suite ID is missing");
     }
+}
+
+function submitPdfReport() {
+    const form = document.getElementById('pdfReportForm');
+    const comment = document.getElementById('comment').value;
+    const projectId = form.dataset.projectId;
+    const testRunId = form.dataset.testRunId;
+    const suiteId = form.dataset.suiteId;
+
+    if (comment.trim() === '') {
+        alert('Please enter a comment.');
+        return;
+    }
+
+    // Формируем URL с комментарием
+    const url = `/project/${projectId}/test-run/${testRunId}/generate-pdf/${suiteId}?comment=${encodeURIComponent(comment)}`;
+
+    // Закрываем модальное окно
+    var modal = bootstrap.Modal.getInstance(document.getElementById('pdfReportModal'));
+    modal.hide();
+
+    // Перенаправляем на URL
+    window.location.href = url;
 }
 
 function shortenUrls(text) {

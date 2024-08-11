@@ -7,11 +7,12 @@ use App\Suite;
 use App\TestPlan;
 use App\TestRun;
 use App\TestCase;
+use Illuminate\Http\Request;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 
 class SuiteReportController extends Controller
 {
-    public function generatePdf($project_id, $test_run_id, $suite_id)
+    public function generatePdf(Request $request, $project_id, $test_run_id, $suite_id)
     {
         $project = Project::findOrFail($project_id);
         $testRun = TestRun::findOrFail($test_run_id);
@@ -21,13 +22,13 @@ class SuiteReportController extends Controller
         $testCasesIds = explode(',', $testPlan->data);
         $testSuitesIds = TestCase::whereIn('id', $testCasesIds)->get()->pluck('suite_id')->toArray();
 
-        // Фильтруем по выбранному suite_id
         $suites = Suite::where('id', $suite_id)->get();
         $testSuitesTree = Suite::whereIn('id', $testSuitesIds)->tree()->get()->toTree();
 
-        // Выбираем тесты только из выбранного suite_id
         $testCases = TestCase::whereIn('suite_id', $suites->pluck('id'))->whereIn('id', $testCasesIds)->get();
         $results = $testRun->getResults();
+
+        $comment = $request->input('comment', '');
 
         $data = [
             'project' => $project,
@@ -37,12 +38,14 @@ class SuiteReportController extends Controller
             'testSuitesTree' => $testSuitesTree,
             'suites' => $suites,
             'testCases' => $testCases,
-            'results' => $results
+            'results' => $results,
+            'comment' => $comment
         ];
 
         $pdf = SnappyPdf::loadView('pdf.suite_report', $data);
         return $pdf->download("TestRun_Report_{$testRun->id}.pdf");
     }
+
 
 }
 
