@@ -94,6 +94,12 @@
             max-width: 2000px; /* Установите ширину логотипа */
             height: auto;
         }
+        .chart-section h3 {
+            margin-bottom: 5px; /* Уменьшенный отступ снизу */
+        }
+        .chart-section img {
+            margin-top: 0; /* Уменьшенный отступ сверху */
+        }
     </style>
 </head>
 <body>
@@ -114,6 +120,13 @@
     <div class="comment-section">
         <h3>Комментарий:</h3>
         <p>{{ $comment }}</p>
+    </div>
+@endif
+
+@if($chartImagePath)
+    <div class="chart-section">
+        <h3>Диаграмма статусов:</h3>
+        <img src="{{ $chartImagePath }}" alt="Status Chart">
     </div>
 @endif
 
