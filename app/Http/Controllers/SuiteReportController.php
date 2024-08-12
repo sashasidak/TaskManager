@@ -44,6 +44,7 @@ class SuiteReportController extends Controller
         ];
 
         $pdf = SnappyPdf::loadView('pdf.suite_report', $data);
+        $pdf->setOption('enable-local-file-access', true);
         return $pdf->download("TestRun_Report_{$testRun->id}.pdf");
     }
 }

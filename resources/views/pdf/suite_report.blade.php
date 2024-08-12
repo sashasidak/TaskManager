@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Test Run Report</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; }
         h1, h3 {
             color: #333;
             margin-bottom: 10px;
@@ -87,14 +86,25 @@
             font-weight: bold;
             text-align: center;
         }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 2000px; /* Установите ширину логотипа */
+            height: auto;
+        }
     </style>
 </head>
 <body>
 
+<div class="logo">
+    <img src="{{ public_path('img/Logo Abank@3x.png') }}" alt="Logo">
+</div>
+
 <h1>Отчет о тестировании: {{ $project->name }}</h1>
 
 @if($relatedSuites->count())
-    <!-- Display only the main suite title -->
     <div class="suite-title">
         <h3>{{ $relatedSuites->first()->title }}</h3>
     </div>
@@ -116,7 +126,6 @@
     </thead>
     <tbody>
     @foreach($relatedSuites as $suite)
-        <!-- Display the suite title as a divider row -->
         <tr class="divider-row">
             <td colspan="2">{{ $suite->title }}</td>
         </tr>
