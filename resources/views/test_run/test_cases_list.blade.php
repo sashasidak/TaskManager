@@ -117,6 +117,7 @@
 
         // Добавляем обработчик события для очистки текста при закрытии модального окна
         pdfReportModal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('smartphoneData').value = ''; // Очистка поля для данных смартфона
             document.getElementById('comment').value = '';
         });
     });
