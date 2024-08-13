@@ -26,12 +26,22 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="pdfReportModalLabel">Enter Comment for PDF Report</h5>
+                            <h5 class="modal-title" id="pdfReportModalLabel">Enter Details for PDF Report</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <form id="pdfReportForm">
-                                <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
+                                <!-- New field for smartphone data -->
+                                <div class="mb-3">
+                                    <label for="smartphoneData" class="form-label">Smartphone Data</label>
+                                    <input type="text" id="smartphoneData" class="form-control" placeholder="Enter smartphone data...">
+                                </div>
+
+                                <!-- Existing field for comment -->
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">Comment</label>
+                                    <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
+                                </div>
                             </form>
                         </div>
                         <div class="modal-footer">
@@ -41,6 +51,7 @@
                     </div>
                 </div>
             </div>
+
 
             {{-- Collapse/Expand Button --}}
             <button class="toggle-button" onclick="toggleTestCases(this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
@@ -128,17 +139,18 @@
     function submitPdfReport() {
         const form = document.getElementById('pdfReportForm');
         const comment = document.getElementById('comment').value;
+        const smartphoneData = document.getElementById('smartphoneData').value;
         const projectId = form.dataset.projectId;
         const testRunId = form.dataset.testRunId;
         const suiteId = form.dataset.suiteId;
 
-        if (comment.trim() === '') {
-            alert('Please enter a comment.');
+        if (comment.trim() === '' || smartphoneData.trim() === '') {
+            alert('Please fill in all fields.');
             return;
         }
 
-        // Формируем URL с комментарием
-        const url = `/project/${projectId}/test-run/${testRunId}/generate-pdf/${suiteId}?comment=${encodeURIComponent(comment)}`;
+        // Формируем URL с комментарием и данными о смартфоне
+        const url = `/project/${projectId}/test-run/${testRunId}/generate-pdf/${suiteId}?comment=${encodeURIComponent(comment)}&smartphoneData=${encodeURIComponent(smartphoneData)}`;
 
         // Закрываем модальное окно
         var modal = bootstrap.Modal.getInstance(document.getElementById('pdfReportModal'));
@@ -147,6 +159,7 @@
         // Перенаправляем на URL
         window.location.href = url;
     }
+
 
     function shortenUrls(text) {
         const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
@@ -178,6 +191,13 @@
 
     .pdf-button {
         right: 50px; /* Положение кнопки PDF */
+    }
+    .modal-body .form-label {
+        font-weight: bold;
+    }
+
+    .modal-body .form-control {
+        margin-bottom: 15px;
     }
 
     .toggle-button {

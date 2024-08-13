@@ -26,6 +26,10 @@
             margin-bottom: 20px;
             text-align: center;
         }
+        .phone-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
         .test-case-container {
             width: 100%;
             border-collapse: collapse;
@@ -122,6 +126,13 @@
     <div class="comment-section">
         <h3>Комментарий:</h3>
         <p>{{ $comment }}</p>
+    </div>
+@endif
+
+@if($phoneFieldData)
+    <div class="phone-section">
+        <h3>Данные об устройствах:</h3>
+        <p>{{ $phoneFieldData }}</p>
     </div>
 @endif
 

@@ -60,6 +60,7 @@ class SuiteReportController extends Controller
         $chartImagePath = $this->generateChart($statusCounts);
 
         $comment = $request->input('comment', '');
+        $phoneFieldData = $request->input('smartphoneData', ''); // Получение данных из поля смартфона
 
         $data = [
             'project' => $project,
@@ -70,6 +71,7 @@ class SuiteReportController extends Controller
             'testCases' => $testCases,
             'results' => $results,
             'comment' => $comment,
+            'phoneFieldData' => $phoneFieldData, // Передача данных поля смартфона в представление
             'chartImagePath' => $chartImagePath,
         ];
 
