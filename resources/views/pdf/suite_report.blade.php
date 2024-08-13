@@ -94,11 +94,13 @@
             max-width: 2000px; /* Установите ширину логотипа */
             height: auto;
         }
-        .chart-section h3 {
-            margin-bottom: 5px; /* Уменьшенный отступ снизу */
+        .chart-section {
+            text-align: center; /* Центрирование содержимого */
+            margin-bottom: 20px; /* Отступ снизу */
         }
         .chart-section img {
-            margin-top: 0; /* Уменьшенный отступ сверху */
+            max-width: 100%; /* Ограничение ширины изображения */
+            height: auto; /* Автоматическое изменение высоты */
         }
     </style>
 </head>

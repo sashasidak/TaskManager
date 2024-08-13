@@ -81,11 +81,14 @@ class SuiteReportController extends Controller
     private function generateChart($statusCounts)
     {
         $total = array_sum($statusCounts);
-        $width = 600; // Ширина диаграммы
-        $height = 400; // Высота диаграммы
+        $width = 800; // Ширина диаграммы и таблицы
+        $height = 300; // Высота диаграммы и таблицы
         $barWidth = 80; // Ширина одного столбика
         $padding = 15;   // Промежуток между столбиками
         $maxBarHeight = $height - 100; // Максимальная высота столбика
+        $tableWidth = 250; // Ширина таблицы
+        $tablePadding = 20; // Отступы таблицы
+        $tableHeight = $height - 60; // Высота таблицы
 
         // Цвета с градиентами
         $colors = [
@@ -95,37 +98,36 @@ class SuiteReportController extends Controller
             'not_tested' => ['#6c757d', '#5a6268'] // Серый градиент
         ];
 
-        // Начало SVG с рамкой
+        // Начало SVG
         $svg = '<svg width="' . $width . '" height="' . $height . '" xmlns="http://www.w3.org/2000/svg">';
 
-        // Градиент для заливки рамки
-        $svg .= '<defs>
-                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" /> <!-- Серый -->
-                    <stop offset="100%" style="stop-color:#0d6efd;stop-opacity:1" /> <!-- Синий -->
-                </linearGradient>';
-
-        // Создание градиентов для столбиков
+        // Градиенты для заливки рамки и столбиков
+        $svg .= '<defs>';
         foreach ($colors as $status => $color) {
             $svg .= '<linearGradient id="grad_' . $status . '" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style="stop-color:' . $color[0] . ';stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:' . $color[1] . ';stop-opacity:1" />
-                 </linearGradient>';
+                <stop offset="0%" style="stop-color:' . $color[0] . ';stop-opacity:1" />
+                <stop offset="100%" style="stop-color:' . $color[1] . ';stop-opacity:1" />
+            </linearGradient>';
         }
-
+        // Градиент для рамки
+        $svg .= '<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" /> <!-- Серый -->
+        <stop offset="100%" style="stop-color:#0d6efd;stop-opacity:1" /> <!-- Синий -->
+    </linearGradient>';
         $svg .= '</defs>';
 
-        // Рамка с закругленными углами и тенью
+        // Рамка с закругленными углами и градиентной заливкой
         $svg .= '<rect x="10" y="10" width="' . ($width - 20) . '" height="' . ($height - 20) . '" rx="15" ry="15" fill="url(#grad1)" stroke="#333" stroke-width="2" filter="url(#shadow)" />';
 
         // Тень для рамки
         $svg .= '<defs>
-                <filter id="shadow">
-                    <feDropShadow dx="5" dy="5" stdDeviation="4" flood-color="#333" flood-opacity="0.5"/>
-                </filter>
-            </defs>';
+            <filter id="shadow">
+                <feDropShadow dx="5" dy="5" stdDeviation="4" flood-color="#333" flood-opacity="0.5"/>
+            </filter>
+        </defs>';
 
-        $x = ($width - (count($statusCounts) * ($barWidth + $padding) - $padding)) / 2; // Начальная координата X
+        // Визуализация столбиков
+        $x = 20; // Начальная координата X
 
         foreach ($statusCounts as $status => $count) {
             if ($count > 0) {
@@ -138,17 +140,36 @@ class SuiteReportController extends Controller
 
                 // Добавление тени к столбику
                 $svg .= '<filter id="barShadow">
-                        <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>
-                    </filter>';
+                    <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>
+                </filter>';
 
                 // Применение тени
                 $svg .= '<rect x="' . $x . '" y="' . $y . '" width="' . $barWidth . '" height="' . $barHeight . '" fill="none" filter="url(#barShadow)" />';
 
                 // Подпись
-                $svg .= '<text x="' . ($x + $barWidth / 2) . '" y="' . ($height - 20) . '" font-family="Arial" font-size="16" fill="#000" text-anchor="middle">' . ucfirst($status) . '</text>';
+                $svg .= '<text x="' . ($x + $barWidth / 2) . '" y="' . ($height - 20) . '" font-family="Arial, sans-serif" font-size="16" fill="#000" text-anchor="middle" font-weight="bold">' . ucfirst($status) . '</text>';
 
                 $x += $barWidth + $padding; // Смещение для следующего столбика
             }
+        }
+
+        // Визуализация таблицы статистики
+        $tableX = $width - $tableWidth - $tablePadding;
+        $tableY = 20;
+
+        $svg .= '<rect x="' . $tableX . '" y="' . $tableY . '" width="' . $tableWidth . '" height="' . $tableHeight . '" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="12" ry="12" />';
+        $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($tableY + 30) . '" font-family="Arial, sans-serif" font-size="20" fill="#333" text-anchor="middle" font-weight="bold">Примерная статистика:</text>';
+
+        $cardY = $tableY + 60;
+        $cardHeight = 30; // Уменьшенная высота карточки
+        $cardSpacing = 5; // Уменьшенное расстояние между карточками
+
+        foreach ($statusCounts as $status => $count) {
+            if ($cardY + $cardHeight > $tableY + $tableHeight) break; // Проверка, не выходит ли карточка за границы таблицы
+
+            $svg .= '<rect x="' . $tableX . '" y="' . $cardY . '" width="' . $tableWidth . '" height="' . $cardHeight . '" fill="url(#grad_' . $status . ')" rx="8" ry="8" />';
+            $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($cardY + $cardHeight / 2 + 5) . '" font-family="Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle" font-weight="bold">' . ucfirst($status) . ': ' . $count . '</text>';
+            $cardY += $cardHeight + $cardSpacing; // Смещение для следующей карточки
         }
 
         // Завершение SVG
@@ -159,7 +180,4 @@ class SuiteReportController extends Controller
 
         return $imagePath;
     }
-
-
-
 }
