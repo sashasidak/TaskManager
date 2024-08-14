@@ -105,8 +105,6 @@
                             </div>
                         </div>
 
-
-
                         <div class="border-top p-2">
                             @include('test_run.chart')
                         </div>
@@ -137,6 +135,11 @@
                     }
                 });
             });
+
+            $('#pdfReportModal').on('show.bs.modal', function (event) {
+                // Clear the form fields
+                $('#pdfReportForm')[0].reset();
+            });
         });
 
         function generateReport(projectId, testRunId) {
@@ -150,6 +153,7 @@
                 console.error("Project ID or Test Run ID is missing");
             }
         }
+
         function submitPdfReport(button) {
             const reportType = document.getElementById('reportType').value;
             const smartphoneData = document.getElementById('smartphoneData').value;
@@ -161,8 +165,6 @@
 
             window.location.href = url;
         }
-
-
     </script>
 
 @endsection

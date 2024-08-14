@@ -10,7 +10,7 @@
         {{-- COLUMN header --}}
         <div class="border-bottom mt-2 pb-2 mb-2 d-flex justify-content-between">
             <span class="fs-5">
-                Test Run <i class="bi bi-arrow-right-short"></i> {{$testRun->title}}
+                {{$testRun->title}}
             </span>
 
             @can('add_edit_test_runs')
