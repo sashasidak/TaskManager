@@ -15,6 +15,24 @@ class ReportController extends Controller
 {
     public function generateReport(Request $request, $projectId, $testRunId)
     {
+        // Получение данных из формы
+    $reportType = $request->input('reportType');
+        $smartphoneData = $request->input('smartphoneData');
+        $comment = $request->input('comment');
+
+        // Выбор заголовка отчета в зависимости от типа отчета
+            switch ($reportType) {
+                case 'regress':
+                    $reportTitle = 'Отчет о регресс тестировании';
+                    break;
+                case 'smoke':
+                    $reportTitle = 'Отчет о смоук тестировании';
+                    break;
+                default:
+                    $reportTitle = 'Отчет о тестировании';
+                    break;
+            }
+
         // Найти проект, тестовый запуск и тестовый план
         $project = Project::findOrFail($projectId);
         $testRun = TestRun::findOrFail($testRunId);
@@ -73,6 +91,9 @@ class ReportController extends Controller
             'taskCount' => $taskCount, // Количество основных задач
             'totalTestCasesCount' => $totalTestCasesCount, // Общее количество тест-кейсов
             'statusCounts' => $statusCounts,
+                    'reportTitle' => $reportTitle,
+            'smartphoneData' => $smartphoneData, // Данные смартфона
+            'comment' => $comment, // Комментарий
         ];
 
         // Генерация PDF
@@ -81,6 +102,5 @@ class ReportController extends Controller
 
         return $pdf->download("TestRun_Report_{$testRun->id}.pdf");
     }
-
-
 }
+

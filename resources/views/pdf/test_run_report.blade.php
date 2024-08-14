@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test Run Report</title>
+    <title>{{ $reportTitle }}</title>
     <style>
         /* Добавьте стили для отчета здесь */
         body { font-family: Arial, sans-serif; }
@@ -9,10 +9,10 @@
     </style>
 </head>
 <body>
-    <h1>Test Run Report</h1>
-
-    <h2>Project: {{ $project->name }}</h2>
+    <h1>{{ $reportTitle }}</h1>
     <h3>Test Run: {{ $testRun->title }}</h3>
+    <p><strong>Smartphone Data:</strong> {{ $smartphoneData }}</p>
+    <p><strong>Comment:</strong> {{ $comment }}</p>
     <p><strong>Total Tasks in Test Plan:</strong> {{ $taskCount }}</p> <!-- Количество основных задач -->
     <p><strong>Total Test Cases in Test Plan:</strong> {{ $totalTestCasesCount }}</p> <!-- Общее количество тест-кейсов -->
 
