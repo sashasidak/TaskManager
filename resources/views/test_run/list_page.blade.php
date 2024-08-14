@@ -49,6 +49,13 @@
                             </div>
                         @endif
 
+                        <!-- Button for generating the report -->
+                        <div class="p-2 text-end">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="generateReport({{ $project->id }}, {{ $testRun->id }})">
+                                <i class="bi bi-file-earmark-text"></i> Generate Report
+                            </button>
+                        </div>
+
                         <div class="border-top p-2">
                             @include('test_run.chart')
                         </div>
@@ -71,15 +78,27 @@
                 $(".test-run-item").each(function() {
                     let title = $(this).find('a.fs-4').text().toLowerCase();
 
-                    // Проверяем совпадение в заголовке карточки
+                    // Check for match in card title
                     if (title.includes(searchTerm)) {
-                        $(this).show(); // Показываем карточку, если есть совпадение
+                        $(this).show(); // Show card if there's a match
                     } else {
-                        $(this).hide(); // Скрываем карточку, если нет совпадения
+                        $(this).hide(); // Hide card if no match
                     }
                 });
             });
         });
+
+        function generateReport(projectId, testRunId) {
+            if (projectId && testRunId) {
+                // Construct the URL for generating the report
+                const url = `/project/${projectId}/test-run/${testRunId}/generate-report`;
+
+                // Redirect to the URL to generate the report
+                window.location.href = url;
+            } else {
+                console.error("Project ID or Test Run ID is missing");
+            }
+        }
     </script>
 
 @endsection
