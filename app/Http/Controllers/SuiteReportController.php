@@ -71,6 +71,7 @@ class SuiteReportController extends Controller
             'testCases' => $testCases,
             'results' => $results,
             'comment' => $comment,
+            'suite' => $suite,
             'phoneFieldData' => $phoneFieldData, // Передача данных поля смартфона в представление
             'chartImagePath' => $chartImagePath,
         ];
@@ -86,10 +87,10 @@ class SuiteReportController extends Controller
         $width = 800; // Ширина диаграммы и таблицы
         $height = 300; // Высота диаграммы и таблицы
         $barWidth = 80; // Ширина одного столбика
-        $padding = 15;   // Промежуток между столбиками
+        $padding = 20;   // Промежуток между столбиками
         $maxBarHeight = $height - 100; // Максимальная высота столбика
         $tableWidth = 250; // Ширина таблицы
-        $tablePadding = 20; // Отступы таблицы
+        $tablePadding = 30; // Отступы таблицы
         $tableHeight = $height - 60; // Высота таблицы
 
         // Цвета с градиентами
@@ -113,23 +114,23 @@ class SuiteReportController extends Controller
         }
         // Градиент для рамки
         $svg .= '<linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" /> <!-- Серый -->
-        <stop offset="100%" style="stop-color:#0d6efd;stop-opacity:1" /> <!-- Синий -->
-    </linearGradient>';
+            <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+        </linearGradient>';
         $svg .= '</defs>';
 
         // Рамка с закругленными углами и градиентной заливкой
-        $svg .= '<rect x="10" y="10" width="' . ($width - 20) . '" height="' . ($height - 20) . '" rx="15" ry="15" fill="url(#grad1)" stroke="#333" stroke-width="2" filter="url(#shadow)" />';
+        $svg .= '<rect x="10" y="10" width="' . ($width - 20) . '" height="' . ($height - 20) . '" rx="20" ry="20" fill="url(#grad1)" stroke="#ccc" stroke-width="2" filter="url(#shadow)" />';
 
         // Тень для рамки
         $svg .= '<defs>
             <filter id="shadow">
-                <feDropShadow dx="5" dy="5" stdDeviation="4" flood-color="#333" flood-opacity="0.5"/>
+                <feDropShadow dx="3" dy="3" stdDeviation="5" flood-color="#aaa" flood-opacity="0.5"/>
             </filter>
         </defs>';
 
         // Визуализация столбиков
-        $x = 20; // Начальная координата X
+        $x = 30; // Начальная координата X
 
         foreach ($statusCounts as $status => $count) {
             if ($count > 0) {
@@ -140,16 +141,8 @@ class SuiteReportController extends Controller
                 // Создание столбика с градиентом и закругленными углами
                 $svg .= '<rect x="' . $x . '" y="' . $y . '" width="' . $barWidth . '" height="' . $barHeight . '" fill="url(#grad_' . $status . ')" rx="10" ry="10" />';
 
-                // Добавление тени к столбику
-                $svg .= '<filter id="barShadow">
-                    <feDropShadow dx="3" dy="3" stdDeviation="2" flood-color="#000" flood-opacity="0.3"/>
-                </filter>';
-
-                // Применение тени
-                $svg .= '<rect x="' . $x . '" y="' . $y . '" width="' . $barWidth . '" height="' . $barHeight . '" fill="none" filter="url(#barShadow)" />';
-
-                // Подпись
-                $svg .= '<text x="' . ($x + $barWidth / 2) . '" y="' . ($height - 20) . '" font-family="Arial, sans-serif" font-size="16" fill="#000" text-anchor="middle" font-weight="bold">' . ucfirst($status) . '</text>';
+                // Подпись под столбиком
+                $svg .= '<text x="' . ($x + $barWidth / 2) . '" y="' . ($height - 20) . '" font-family="Arial, sans-serif" font-size="18" fill="#333" text-anchor="middle" font-weight="bold">' . ucfirst($status) . '</text>';
 
                 $x += $barWidth + $padding; // Смещение для следующего столбика
             }
@@ -159,18 +152,25 @@ class SuiteReportController extends Controller
         $tableX = $width - $tableWidth - $tablePadding;
         $tableY = 20;
 
-        $svg .= '<rect x="' . $tableX . '" y="' . $tableY . '" width="' . $tableWidth . '" height="' . $tableHeight . '" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" rx="12" ry="12" />';
-        $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($tableY + 30) . '" font-family="Arial, sans-serif" font-size="20" fill="#333" text-anchor="middle" font-weight="bold">Примерная статистика:</text>';
+        $svg .= '<rect x="' . $tableX . '" y="' . $tableY . '" width="' . $tableWidth . '" height="' . $tableHeight . '" fill="#ffffff" stroke="#ddd" stroke-width="1" rx="15" ry="15" filter="url(#tableShadow)" />';
+        $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($tableY + 30) . '" font-family="Arial, sans-serif" font-size="24" fill="#333" text-anchor="middle" font-weight="bold">Статистика</text>';
 
         $cardY = $tableY + 60;
-        $cardHeight = 30; // Уменьшенная высота карточки
-        $cardSpacing = 5; // Уменьшенное расстояние между карточками
+        $cardHeight = 40; // Высота карточки
+        $cardSpacing = 5; // Расстояние между карточками
 
         foreach ($statusCounts as $status => $count) {
             if ($cardY + $cardHeight > $tableY + $tableHeight) break; // Проверка, не выходит ли карточка за границы таблицы
 
+            // Добавление тени для карточек
+            $svg .= '<defs>
+                <filter id="tableShadow">
+                    <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#aaa" flood-opacity="0.4"/>
+                </filter>
+            </defs>';
+
             $svg .= '<rect x="' . $tableX . '" y="' . $cardY . '" width="' . $tableWidth . '" height="' . $cardHeight . '" fill="url(#grad_' . $status . ')" rx="8" ry="8" />';
-            $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($cardY + $cardHeight / 2 + 5) . '" font-family="Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle" font-weight="bold">' . ucfirst($status) . ': ' . $count . '</text>';
+            $svg .= '<text x="' . ($tableX + $tableWidth / 2) . '" y="' . ($cardY + $cardHeight / 2 + 5) . '" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" text-anchor="middle" font-weight="bold">' . ucfirst($status) . ': ' . $count . '</text>';
             $cardY += $cardHeight + $cardSpacing; // Смещение для следующей карточки
         }
 
@@ -182,4 +182,6 @@ class SuiteReportController extends Controller
 
         return $imagePath;
     }
+
+
 }
