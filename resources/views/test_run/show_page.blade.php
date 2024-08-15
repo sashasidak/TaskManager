@@ -31,9 +31,29 @@
         <div id="filter-input-container" style="display: none; margin-bottom: 10px;">
             <input type="text" id="filter-input" class="form-control" placeholder="Введите для фильтрации...">
         </div>
-
-        <div class="pb-2" id="chart">
-            @include('test_run.chart')
+        <!-- Progress Bar -->
+        <div class="progress mb-1" >
+            @php
+                $total = array_sum($statusCounts);
+                $widths = [];
+                if ($total > 0) {
+                    foreach (['passed', 'failed', 'blocked', 'not_tested'] as $status) {
+                        $widths[$status] = ($statusCounts[$status] / $total) * 100;
+                    }
+                }
+            @endphp
+            <div class="progress-bar bg-success position-relative" role="progressbar" style="width: {{ $widths['passed'] ?? 0 }}%;">
+                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $statusCounts['passed'] }}</span>
+            </div>
+            <div class="progress-bar bg-danger position-relative" role="progressbar" style="width: {{ $widths['failed'] ?? 0 }}%;">
+                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $statusCounts['failed'] }}</span>
+            </div>
+            <div class="progress-bar bg-warning position-relative" role="progressbar" style="width: {{ $widths['blocked'] ?? 0 }}%;">
+                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $statusCounts['blocked'] }}</span>
+            </div>
+            <div class="progress-bar bg-secondary position-relative" role="progressbar" style="width: {{ $widths['not_tested'] ?? 0 }}%;">
+                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $statusCounts['not_tested'] }}</span>
+            </div>
         </div>
 
         <div id="tree">

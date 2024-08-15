@@ -110,8 +110,31 @@
                         </div>
 
                         <div class="border-top p-2">
-                            @include('test_run.chart')
+                        <!-- Progress Bar -->
+                        <div class="progress" style="height: 20px;">
+                            @php
+                                $total = array_sum($testRunStatusCounts[$testRun->id]);
+                                $widths = [];
+                                if ($total > 0) {
+                                    foreach (['passed', 'failed', 'blocked', 'not_tested'] as $status) {
+                                        $widths[$status] = ($testRunStatusCounts[$testRun->id][$status] / $total) * 100;
+                                    }
+                                }
+                            @endphp
+                            <div class="progress-bar bg-success position-relative" role="progressbar" style="width: {{ $widths['passed'] ?? 0 }}%;">
+                                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $testRunStatusCounts[$testRun->id]['passed'] }}</span>
+                            </div>
+                            <div class="progress-bar bg-danger position-relative" role="progressbar" style="width: {{ $widths['failed'] ?? 0 }}%;">
+                                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $testRunStatusCounts[$testRun->id]['failed'] }}</span>
+                            </div>
+                            <div class="progress-bar bg-warning position-relative" role="progressbar" style="width: {{ $widths['blocked'] ?? 0 }}%;">
+                                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $testRunStatusCounts[$testRun->id]['blocked'] }}</span>
+                            </div>
+                            <div class="progress-bar bg-secondary position-relative" role="progressbar" style="width: {{ $widths['not_tested'] ?? 0 }}%;">
+                                <span class="text-white position-absolute w-100 text-center" style="font-size: 0.9rem;">{{ $testRunStatusCounts[$testRun->id]['not_tested'] }}</span>
+                            </div>
                         </div>
+                         </div>
                     </div>
                 </div>
             @endforeach
@@ -165,6 +188,12 @@
             const testRunId = button.getAttribute('data-test-run-id');
 
             const url = `/project/${projectId}/test-run/${testRunId}/generate-report?reportType=${encodeURIComponent(reportType)}&smartphoneData=${encodeURIComponent(smartphoneData)}&comment=${encodeURIComponent(comment)}&description=${encodeURIComponent(description)}`;
+
+            // Закрываем модальное окно
+                var modal = bootstrap.Modal.getInstance(document.getElementById('pdfReportModal'));
+                if (modal) {
+                    modal.hide();
+                }
 
             window.location.href = url;
         }
