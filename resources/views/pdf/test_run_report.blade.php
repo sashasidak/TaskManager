@@ -99,6 +99,7 @@
         </div>
         <h1>{{ $reportTitle }}</h1>
         <p>{{ $testRun->title }}</p>
+        <p>{{ $description }}</p>
     </div>
     <div class="content">
         <div class="chart">

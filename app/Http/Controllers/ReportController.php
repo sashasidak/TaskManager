@@ -19,6 +19,7 @@ class ReportController extends Controller
         $reportType = $request->input('reportType');
         $smartphoneData = $request->input('smartphoneData');
         $comment = $request->input('comment');
+        $description = $request->input('description');
 
         // Выбор заголовка отчета в зависимости от типа отчета
         switch ($reportType) {
@@ -97,6 +98,7 @@ class ReportController extends Controller
             'reportTitle' => $reportTitle,
             'smartphoneData' => $smartphoneData, // Данные смартфона
             'comment' => $comment, // Комментарий
+            'description' => $description, // Комментарий
             'chartImagePath' => $chartImagePath, // Путь к диаграмме
         ];
 

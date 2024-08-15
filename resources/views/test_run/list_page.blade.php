@@ -40,7 +40,7 @@
                         </div>
 
                         @if($testRun->testPlan && $testRun->testPlan->description)
-                            <div class="card-text text-muted ps-3">
+                            <div class="card-text text-muted ps-3" id="description-{{ $testRun->id }}">
                                 <span>{!! preg_replace(
                                     '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
                                     '<a href="$0" target="_blank">$0</a>',
@@ -55,7 +55,8 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#pdfReportModal"
                                     data-project-id="{{ $project->id }}"
-                                    data-test-run-id="{{ $testRun->id }}">
+                                    data-test-run-id="{{ $testRun->id }}"
+                                    data-description-id="description-{{ $testRun->id }}">
                                 <i class="bi bi-file-earmark-text"></i> Generate Report
                             </button>
                         </div>
@@ -70,6 +71,9 @@
                                     </div>
                                     <div class="modal-body">
                                         <form id="pdfReportForm">
+                                            <!-- Hidden field for description -->
+                                            <input type="hidden" id="hiddenDescription" name="description">
+
                                             <!-- Dropdown for report type -->
                                             <div class="mb-3">
                                                 <label for="reportType" class="form-label">Report Type</label>
@@ -137,31 +141,30 @@
             });
 
             $('#pdfReportModal').on('show.bs.modal', function (event) {
+                // Get the button that triggered the modal
+                var button = $(event.relatedTarget);
+                var descriptionId = button.data('description-id');
+
+                // Get the description text
+                var descriptionText = $('#' + descriptionId).text().trim();
+
+                // Set the description in the hidden field
+                $('#hiddenDescription').val(descriptionText);
+
                 // Clear the form fields
                 $('#pdfReportForm')[0].reset();
             });
         });
 
-        function generateReport(projectId, testRunId) {
-            if (projectId && testRunId) {
-                // Construct the URL for generating the report
-                const url = `/project/${projectId}/test-run/${testRunId}/generate-report`;
-
-                // Redirect to the URL to generate the report
-                window.location.href = url;
-            } else {
-                console.error("Project ID or Test Run ID is missing");
-            }
-        }
-
         function submitPdfReport(button) {
             const reportType = document.getElementById('reportType').value;
             const smartphoneData = document.getElementById('smartphoneData').value;
             const comment = document.getElementById('comment').value;
+            const description = document.getElementById('hiddenDescription').value;
             const projectId = button.getAttribute('data-project-id');
             const testRunId = button.getAttribute('data-test-run-id');
 
-            const url = `/project/${projectId}/test-run/${testRunId}/generate-report?reportType=${encodeURIComponent(reportType)}&smartphoneData=${encodeURIComponent(smartphoneData)}&comment=${encodeURIComponent(comment)}`;
+            const url = `/project/${projectId}/test-run/${testRunId}/generate-report?reportType=${encodeURIComponent(reportType)}&smartphoneData=${encodeURIComponent(smartphoneData)}&comment=${encodeURIComponent(comment)}&description=${encodeURIComponent(description)}`;
 
             window.location.href = url;
         }
