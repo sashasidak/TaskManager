@@ -10,6 +10,8 @@ use \App\Http\Controllers\RepositoryController;
 use \App\Http\Controllers\DocumentsController;
 use \App\Http\Controllers\AuthController;
 use \App\Http\Controllers\UsersController;
+use App\Http\Controllers\SuiteReportController;
+use App\Http\Controllers\ReportController;
 
 
 /**********************************************************************
@@ -196,6 +198,10 @@ Route::middleware(['auth'])->group(function () {
     /*************************************
     // PROJECT TEST RUN PAGES
      *************************************/
+     Route::get('/project/{project_id}/test-run/{test_run_id}/generate-report', [ReportController::class, 'generateReport'])
+         ->where('project_id', '[0-9]+')
+         ->where('test_run_id', '[0-9]+')
+         ->name('generateReport');
 
     Route::get('/project/{project_id}/test-runs', [TestRunController::class, 'index'])
         ->where('project_id', '[0-9]+')
@@ -224,6 +230,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/trchart/{test_run_id}', [TestRunController::class, 'loadChart'])
         ->where('test_run_id', '[0-9]+');
+
+    Route::get('/project/{project_id}/test-run/{test_run_id}/generate-pdf/{suite_id}', [SuiteReportController::class, 'generatePdf'])
+        ->name('generatePdf');
 
 //Update test case status in results array
 

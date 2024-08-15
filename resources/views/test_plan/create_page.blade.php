@@ -36,7 +36,7 @@
 
                     <div class="mb-3">
                         <label for="title" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="title"  value="Test plan - {{date('Y.m.d H:i')}}" required maxlength="100">
+                        <input type="text" class="form-control" name="title"  value="Test plan" required maxlength="100">
                     </div>
 
                     <div class="mb-3">
