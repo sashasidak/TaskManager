@@ -68,52 +68,53 @@
    <!-- Модальное окно для копирования задач -->
    <div class="modal fade" id="copyTasksModal" tabindex="-1" aria-labelledby="copyTasksModalLabel" aria-hidden="true">
        <div class="modal-dialog modal-lg">
-           <div class="modal-content">
-               <div class="modal-header">
+           <div class="modal-content rounded-4 shadow-lg">
+               <div class="modal-header border-bottom-0">
                    <h5 class="modal-title" id="copyTasksModalLabel">Copy Tasks</h5>
                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                </div>
                <form id="copy-tasks-form" method="POST">
                    @csrf
-                   <div class="modal-body d-flex">
-                       <!-- Левая половина -->
-                       <div class="flex-fill me-3">
-                           <div class="mb-3">
-                               <label for="source-repository" class="form-label">Source Repository</label>
-                               <select id="source-repository" name="source_repository" class="form-select" required>
-                                   @foreach($repositories as $repository)
-                                       <option value="{{ $repository->id }}">{{ $repository->title }}</option>
-                                   @endforeach
-                               </select>
+                   <div class="modal-body">
+                       <div class="row">
+                           <!-- Левая половина -->
+                           <div class="col-md-6">
+                               <div class="mb-3">
+                                   <label for="source-repository" class="form-label fw-bold">Source Repository</label>
+                                   <select id="source-repository" name="source_repository" class="form-select" required>
+                                       @foreach($repositories as $repository)
+                                           <option value="{{ $repository->id }}">{{ $repository->title }}</option>
+                                       @endforeach
+                                   </select>
+                               </div>
+                               <div class="mb-3">
+                                   <label for="suites" class="form-label fw-bold">Select Tasks to Copy</label>
+                                   <div id="suites-container" class="tasks-container">
+                                       <!-- Динамически добавляемые задачи и тест-кейсы -->
+                                   </div>
+                               </div>
                            </div>
-                           <div class="mb-3">
-                               <label for="suites" class="form-label">Select Tasks to Copy</label>
-                               <div id="suites-container">
-                                   <!-- Динамически добавляемые задачи и тест-кейсы -->
+
+                           <!-- Правая половина -->
+                           <div class="col-md-6">
+                               <div class="mb-3">
+                                   <label for="target-repository" class="form-label fw-bold">Target Repository</label>
+                                   <select id="target-repository" name="target_repository" class="form-select" required>
+                                       @foreach($repositories as $repository)
+                                           <option value="{{ $repository->id }}">{{ $repository->title }}</option>
+                                       @endforeach
+                                   </select>
+                               </div>
+                               <div class="mb-3">
+                                   <label for="target-suites" class="form-label fw-bold">Target Tasks</label>
+                                   <div id="target-suites-container" class="tasks-container">
+                                       <!-- Динамически добавляемые задачи для целевого репозитория -->
+                                   </div>
                                </div>
                            </div>
                        </div>
-
-                       <!-- Правая половина -->
-                       <div class="flex-fill ms-3">
-                           <div class="mb-3">
-                               <label for="target-repository" class="form-label">Target Repository</label>
-                               <select id="target-repository" name="target_repository" class="form-select" required>
-                                   @foreach($repositories as $repository)
-                                       <option value="{{ $repository->id }}">{{ $repository->title }}</option>
-                                   @endforeach
-                               </select>
-                           </div>
-                           <div class="mb-3">
-                               <label for="target-suites" class="form-label">Target Tasks</label>
-                               <div id="target-suites-container">
-                                   <!-- Динамически добавляемые задачи для целевого репозитория -->
-                               </div>
-                           </div>
-                       </div>
-
                    </div>
-                   <div class="modal-footer">
+                   <div class="modal-footer border-top-0 d-flex justify-content-between">
                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                        <button type="submit" class="btn btn-primary">Copy Tasks</button>
                    </div>
@@ -127,6 +128,43 @@
 @endsection
 
 @section('footer')
+<style>
+    .tasks-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .task-item {
+        border-bottom: 1px solid #dee2e6;
+        padding: 10px 0;
+    }
+    .task-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .test-case {
+        padding-left: 20px;
+        border-top: 1px dashed #dee2e6;
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+    .sub-task {
+        padding-left: 20px;
+        border-top: 1px dashed #dee2e6;
+        padding-top: 10px;
+        margin-top: 5px;
+    }
+    .form-check-input {
+        margin-right: 5px;
+    }
+    .form-check-label {
+        display: inline;
+    }
+    .task-title input[type="checkbox"] {
+        margin-right: 10px;
+    }
+</style>
 <script>
    document.getElementById('filter-input').addEventListener('input', function () {
        let searchTerm = this.value.toLowerCase();
@@ -154,47 +192,53 @@
                .then(response => response.json())
                .then(data => {
                    const createSuiteElement = (suite, level = 0) => {
-                       const checkbox = document.createElement('input');
-                       checkbox.type = 'checkbox';
-                       checkbox.name = 'suite_ids[]'; // Массив ID задач
-                       checkbox.value = suite.id;
-                       checkbox.id = `suite-${suite.id}`;
+                       const container = document.createElement('div');
+                       container.classList.add('task-item');
 
-                       const label = document.createElement('label');
-                       label.htmlFor = `suite-${suite.id}`;
-                       label.textContent = suite.title;
+                       const title = document.createElement('div');
+                       title.classList.add('task-title');
 
-                       const div = document.createElement('div');
-                       div.classList.add('form-check');
-                       div.style.marginLeft = `${level * 20}px`;
-                       div.appendChild(checkbox);
-                       div.appendChild(label);
+                       // Основной чекбокс задачи
+                       const suiteCheckbox = document.createElement('input');
+                       suiteCheckbox.type = 'checkbox';
+                       suiteCheckbox.name = 'suite_ids[]'; // Массив ID задач
+                       suiteCheckbox.value = suite.id;
+                       suiteCheckbox.id = `suite-${suite.id}`;
+                       suiteCheckbox.classList.add('form-check-input');
 
-                       const suiteDiv = document.createElement('div');
-                       suiteDiv.appendChild(div);
+                       const suiteLabel = document.createElement('label');
+                       suiteLabel.htmlFor = `suite-${suite.id}`;
+                       suiteLabel.textContent = suite.title;
+                       suiteLabel.classList.add('form-check-label');
+
+                       title.appendChild(suiteCheckbox);
+                       title.appendChild(suiteLabel);
+                       container.appendChild(title);
 
                        // Создание контейнера для тест-кейсов
                        const testCaseContainer = document.createElement('div');
-                       testCaseContainer.classList.add('ms-3'); // Отступ для тест-кейсов
-                       testCaseContainer.id = `testcases-${suite.id}`;
+                       testCaseContainer.classList.add('test-case');
+                       testCaseContainer.style.paddingLeft = `${level * 20}px`;
 
-                       // Загрузка тест-кейсов для этой задачи
                        fetch(`/suites/${suite.id}/test-cases`)
                            .then(response => response.json())
                            .then(testCasesData => {
                                testCasesData.test_cases.forEach(testCase => {
+                                   const testCaseDiv = document.createElement('div');
+                                   testCaseDiv.classList.add('form-check');
+
                                    const testCaseCheckbox = document.createElement('input');
                                    testCaseCheckbox.type = 'checkbox';
                                    testCaseCheckbox.name = 'test_case_ids[]'; // Массив ID тест-кейсов
                                    testCaseCheckbox.value = testCase.id;
                                    testCaseCheckbox.id = `testcase-${testCase.id}`;
+                                   testCaseCheckbox.classList.add('form-check-input', 'me-2');
 
                                    const testCaseLabel = document.createElement('label');
                                    testCaseLabel.htmlFor = `testcase-${testCase.id}`;
                                    testCaseLabel.textContent = testCase.title;
+                                   testCaseLabel.classList.add('form-check-label');
 
-                                   const testCaseDiv = document.createElement('div');
-                                   testCaseDiv.classList.add('form-check');
                                    testCaseDiv.appendChild(testCaseCheckbox);
                                    testCaseDiv.appendChild(testCaseLabel);
 
@@ -205,19 +249,19 @@
                                console.error('Error fetching test cases:', error);
                            });
 
-                       suiteDiv.appendChild(testCaseContainer);
+                       container.appendChild(testCaseContainer);
 
                        if (suite.children) {
-                           const childList = document.createElement('ul');
+                           const childList = document.createElement('div');
+                           childList.classList.add('sub-task');
                            suite.children.forEach(childSuite => {
-                               const childItem = document.createElement('li');
-                               childItem.appendChild(createSuiteElement(childSuite, level + 1));
+                               const childItem = createSuiteElement(childSuite, level + 1);
                                childList.appendChild(childItem);
                            });
-                           suiteDiv.appendChild(childList);
+                           container.appendChild(childList);
                        }
 
-                       return suiteDiv;
+                       return container;
                    };
 
                    data.suites.forEach(suite => {
@@ -231,7 +275,6 @@
        }
    });
 
-
    document.getElementById('target-repository').addEventListener('change', function () {
        const targetRepoId = this.value;
        const targetSuitesContainer = document.getElementById('target-suites-container');
@@ -242,36 +285,41 @@
                .then(response => response.json())
                .then(data => {
                    const createSuiteElement = (suite, level = 0) => {
-                       const checkbox = document.createElement('input');
-                       checkbox.type = 'checkbox';
-                       checkbox.name = 'target_suite_ids[]'; // Массив ID задач для целевого репозитория
-                       checkbox.value = suite.id;
-                       checkbox.id = `target-suite-${suite.id}`;
+                       const container = document.createElement('div');
+                       container.classList.add('task-item');
 
-                       const label = document.createElement('label');
-                       label.htmlFor = `target-suite-${suite.id}`;
-                       label.textContent = suite.title;
+                       const title = document.createElement('div');
+                       title.classList.add('task-title');
 
-                       const div = document.createElement('div');
-                       div.classList.add('form-check');
-                       div.style.marginLeft = `${level * 20}px`;
-                       div.appendChild(checkbox);
-                       div.appendChild(label);
+                       // Основная радиокнопка задачи
+                       const suiteRadio = document.createElement('input');
+                       suiteRadio.type = 'radio';
+                       suiteRadio.name = 'target_suite_id'; // Один ID задачи для целевого репозитория
+                       suiteRadio.value = suite.id;
+                       suiteRadio.id = `target-suite-${suite.id}`;
+                       suiteRadio.classList.add('form-check-input');
 
-                       const suiteDiv = document.createElement('div');
-                       suiteDiv.appendChild(div);
+                       const suiteLabel = document.createElement('label');
+                       suiteLabel.htmlFor = `target-suite-${suite.id}`;
+                       suiteLabel.textContent = suite.title;
+                       suiteLabel.classList.add('form-check-label');
 
+                       title.appendChild(suiteRadio);
+                       title.appendChild(suiteLabel);
+                       container.appendChild(title);
+
+                       // Подзадачи
                        if (suite.children) {
-                           const childList = document.createElement('ul');
+                           const childList = document.createElement('div');
+                           childList.classList.add('sub-task');
                            suite.children.forEach(childSuite => {
-                               const childItem = document.createElement('li');
-                               childItem.appendChild(createSuiteElement(childSuite, level + 1));
+                               const childItem = createSuiteElement(childSuite, level + 1);
                                childList.appendChild(childItem);
                            });
-                           suiteDiv.appendChild(childList);
+                           container.appendChild(childList);
                        }
 
-                       return suiteDiv;
+                       return container;
                    };
 
                    data.suites.forEach(suite => {

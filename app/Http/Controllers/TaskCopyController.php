@@ -21,48 +21,46 @@ class TaskCopyController extends Controller
         // Получаем данные из запроса
         $suiteIds = $request->input('suite_ids', []);
         $testCaseIds = $request->input('test_case_ids', []);
-        $targetSuiteIds = $request->input('target_suite_ids', []);
+        $targetSuiteId = $request->input('target_suite_id'); // Один ID задачи для целевого репозитория
 
         \Log::info('Source Repository ID:', [$sourceRepoId]);
         \Log::info('Target Repository ID:', [$targetRepoId]);
         \Log::info('Suite IDs:', $suiteIds);
         \Log::info('Test Case IDs:', $testCaseIds);
-        \Log::info('Target Suite IDs:', $targetSuiteIds);
+        \Log::info('Target Suite ID:', [$targetSuiteId]);
 
-        // Если указаны только тест-кейсы и целевые задачи
-            if (!empty($testCaseIds) && !empty($targetSuiteIds)) {
-                foreach ($targetSuiteIds as $targetSuiteId) {
-                    // Проверяем существование целевой задачи
-                    $targetSuite = Suite::find($targetSuiteId);
-                    if (!$targetSuite) {
-                        \Log::error('Target Suite not found:', ['id' => $targetSuiteId]);
-                        continue;
-                    }
-
-                    \Log::info('Target Suite Found:', [$targetSuiteId]);
-
-                    // Получаем тест-кейсы из исходного репозитория
-                    $sourceTestCases = TestCase::whereIn('id', $testCaseIds)->get();
-
-                    \Log::info('Source Test Cases:', $sourceTestCases->toArray());
-
-                    // Копирование тест-кейсов в целевую задачу
-                    foreach ($sourceTestCases as $testCase) {
-                        $newTestCase = $testCase->replicate();
-                        $newTestCase->suite_id = $targetSuite->id;
-                        // Не указываем repository_id, если оно не нужно в этой таблице
-                        // $newTestCase->repository_id = $targetRepo->id; // Возможно, эта строка не нужна
-
-                        if ($newTestCase->save()) {
-                            \Log::info('Copied Test Case:', [$newTestCase->id]);
-                        } else {
-                            \Log::error('Failed to Copy Test Case:', [$testCase->id]);
-                        }
-                    }
-                }
-
-                return response()->json(['message' => 'Test cases copied successfully.']);
+        // Если указаны только тест-кейсы и целевая задача
+        if (!empty($testCaseIds) && !empty($targetSuiteId)) {
+            // Проверяем существование целевой задачи
+            $targetSuite = Suite::find($targetSuiteId);
+            if (!$targetSuite) {
+                \Log::error('Target Suite not found:', ['id' => $targetSuiteId]);
+                return response()->json(['message' => 'Target Suite not found.'], 400);
             }
+
+            \Log::info('Target Suite Found:', [$targetSuiteId]);
+
+            // Получаем тест-кейсы из исходного репозитория
+            $sourceTestCases = TestCase::whereIn('id', $testCaseIds)->get();
+
+            \Log::info('Source Test Cases:', $sourceTestCases->toArray());
+
+            // Копирование тест-кейсов в целевую задачу
+            foreach ($sourceTestCases as $testCase) {
+                $newTestCase = $testCase->replicate();
+                $newTestCase->suite_id = $targetSuite->id;
+                // Не указываем repository_id, если оно не нужно в этой таблице
+                // $newTestCase->repository_id = $targetRepo->id; // Возможно, эта строка не нужна
+
+                if ($newTestCase->save()) {
+                    \Log::info('Copied Test Case:', [$newTestCase->id]);
+                } else {
+                    \Log::error('Failed to Copy Test Case:', [$testCase->id]);
+                }
+            }
+
+            return response()->json(['message' => 'Test cases copied successfully.']);
+        }
 
         // Если указаны только задачи
         if (!empty($suiteIds) && empty($testCaseIds)) {
