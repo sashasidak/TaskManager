@@ -94,6 +94,8 @@ Route::middleware(['auth'])->group(function () {
      ***********************************************************************/
 
      Route::post('/copy-tasks/{sourceRepoId}/{targetRepoId}', [TaskCopyController::class, 'copyTasks'])->name('copy-tasks');
+     Route::get('/repositories/{repositoryId}/suites', [TaskCopyController::class, 'getSuitesByRepository']);
+     Route::get('/suites/{suiteId}/test-cases', [TaskCopyController::class, 'getTestCasesBySuite']);
 
 
     Route::get('/project/{project_id}/repositories', [RepositoryController::class, 'index'])
