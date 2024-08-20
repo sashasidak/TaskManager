@@ -67,7 +67,7 @@
 
    <!-- Модальное окно для копирования задач -->
    <div class="modal fade" id="copyTasksModal" tabindex="-1" aria-labelledby="copyTasksModalLabel" aria-hidden="true">
-       <div class="modal-dialog modal-lg">
+       <div class="modal-dialog modal-xl"> <!-- Изменен класс на modal-xl для увеличенного размера -->
            <div class="modal-content rounded-4 shadow-lg">
                <div class="modal-header border-bottom-0">
                    <h5 class="modal-title" id="copyTasksModalLabel">Copy Tasks</h5>
@@ -134,26 +134,36 @@
         overflow-y: auto;
     }
     .task-item {
-        border-bottom: 1px solid #dee2e6;
-        padding: 10px 0;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 1px solid #dee2e6;
+        padding: 10px;
+        margin-bottom: 10px;
     }
     .task-title {
         font-weight: bold;
         margin-bottom: 5px;
         display: flex;
         align-items: center;
+        background: #ffffff;
+        border-radius: 4px;
+        padding: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
     .test-case {
-        padding-left: 20px;
-        border-top: 1px dashed #dee2e6;
-        padding-top: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        padding: 8px;
         margin-top: 5px;
+        border-left: 4px solid #007bff;
+            margin-left: 20px; /* Добавлено для сдвига вправо */
     }
     .sub-task {
-        padding-left: 20px;
-        border-top: 1px dashed #dee2e6;
-        padding-top: 10px;
+        background: #ffffff;
+        border-radius: 4px;
+        padding: 8px;
         margin-top: 5px;
+        border-left: 4px solid #28a745;
     }
     .form-check-input {
         margin-right: 5px;
@@ -198,21 +208,29 @@
                        const title = document.createElement('div');
                        title.classList.add('task-title');
 
-                       // Основной чекбокс задачи
-                       const suiteCheckbox = document.createElement('input');
-                       suiteCheckbox.type = 'checkbox';
-                       suiteCheckbox.name = 'suite_ids[]'; // Массив ID задач
-                       suiteCheckbox.value = suite.id;
-                       suiteCheckbox.id = `suite-${suite.id}`;
-                       suiteCheckbox.classList.add('form-check-input');
+                       // Чекбокс для задач, которые не являются подзадачами
+                       if (suite.parent_id === null || suite.parent_id === undefined) {
+                           const suiteCheckbox = document.createElement('input');
+                           suiteCheckbox.type = 'checkbox';
+                           suiteCheckbox.name = 'suite_ids[]'; // Массив ID задач
+                           suiteCheckbox.value = suite.id;
+                           suiteCheckbox.id = `suite-${suite.id}`;
+                           suiteCheckbox.classList.add('form-check-input');
 
-                       const suiteLabel = document.createElement('label');
-                       suiteLabel.htmlFor = `suite-${suite.id}`;
-                       suiteLabel.textContent = suite.title;
-                       suiteLabel.classList.add('form-check-label');
+                           const suiteLabel = document.createElement('label');
+                           suiteLabel.htmlFor = `suite-${suite.id}`;
+                           suiteLabel.textContent = suite.title;
+                           suiteLabel.classList.add('form-check-label');
 
-                       title.appendChild(suiteCheckbox);
-                       title.appendChild(suiteLabel);
+                           title.appendChild(suiteCheckbox);
+                           title.appendChild(suiteLabel);
+                       } else {
+                           const suiteLabel = document.createElement('label');
+                           suiteLabel.textContent = suite.title;
+                           suiteLabel.classList.add('form-check-label');
+                           title.appendChild(suiteLabel);
+                       }
+
                        container.appendChild(title);
 
                        // Создание контейнера для тест-кейсов
@@ -251,6 +269,7 @@
 
                        container.appendChild(testCaseContainer);
 
+                       // Подзадачи
                        if (suite.children) {
                            const childList = document.createElement('div');
                            childList.classList.add('sub-task');
