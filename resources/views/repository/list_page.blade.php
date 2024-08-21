@@ -166,6 +166,9 @@
         border-left: 4px solid #007bff;
             margin-left: 20px; /* Добавлено для сдвига вправо */
     }
+    .task-title .btn {
+        margin-left: 10px;
+    }
     .sub-task {
         background: #ffffff;
         border-radius: 4px;
@@ -280,6 +283,15 @@
                                title.appendChild(suiteLabel);
                            }
 
+                           // Иконка "Select All"
+                                               const selectAllIcon = document.createElement('button');
+                                               selectAllIcon.innerHTML = '<i class="bi bi-check-all"></i>'; // Используем иконку Bootstrap Icons
+                                               selectAllIcon.classList.add('btn', 'btn-sm', 'btn-primary', 'ms-3', 'select-all-icon');
+                                               selectAllIcon.type = 'button'; // Убедитесь, что кнопка не вызывает отправку формы
+                                               selectAllIcon.addEventListener('click', () => {
+                                                   selectAllTestCases(testCaseContainer);
+                                               });
+                                               title.appendChild(selectAllIcon);
                            container.appendChild(title);
 
                            // Создание контейнера для тест-кейсов
@@ -330,6 +342,11 @@
                            }
 
                            return container;
+                       };
+
+                       const selectAllTestCases = (container) => {
+                           const checkboxes = container.querySelectorAll('.form-check input[type="checkbox"]');
+                           checkboxes.forEach(checkbox => checkbox.checked = true);
                        };
 
                        data.suites.forEach(suite => {
