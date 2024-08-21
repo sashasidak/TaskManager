@@ -88,6 +88,10 @@
                                    </select>
                                </div>
                                <div class="mb-3">
+                                   <label for="source-task-filter" class="form-label">Filter Tasks</label>
+                                   <input type="text" id="source-task-filter" class="form-control" placeholder="Type to filter tasks">
+                               </div>
+                               <div class="mb-3">
                                    <label for="suites" class="form-label fw-bold">Select Tasks to Copy</label>
                                    <div id="suites-container" class="tasks-container">
                                        <!-- Динамически добавляемые задачи и тест-кейсы -->
@@ -104,6 +108,10 @@
                                            <option value="{{ $repository->id }}">{{ $repository->title }}</option>
                                        @endforeach
                                    </select>
+                               </div>
+                               <div class="mb-3">
+                                   <label for="target-task-filter" class="form-label">Filter Tasks</label>
+                                   <input type="text" id="target-task-filter" class="form-control" placeholder="Type to filter tasks">
                                </div>
                                <div class="mb-3">
                                    <label for="target-suites" class="form-label fw-bold">Target Tasks</label>
@@ -185,6 +193,30 @@
                element.dispatchEvent(event);
            }
        }
+       // Функция фильтрации задач
+           function filterTasks(inputId, containerId) {
+               const filterValue = document.getElementById(inputId).value.toLowerCase();
+               const tasksContainer = document.getElementById(containerId);
+               const taskItems = tasksContainer.querySelectorAll('.task-item');
+
+               taskItems.forEach(item => {
+                   const title = item.querySelector('.task-title').textContent.toLowerCase();
+                   if (title.includes(filterValue)) {
+                       item.style.display = '';
+                   } else {
+                       item.style.display = 'none';
+                   }
+               });
+           }
+
+           // Обработчики событий для фильтрации задач
+           document.getElementById('source-task-filter').addEventListener('input', function () {
+               filterTasks('source-task-filter', 'suites-container');
+           });
+
+           document.getElementById('target-task-filter').addEventListener('input', function () {
+               filterTasks('target-task-filter', 'target-suites-container');
+           });
 
        // Обработчик для открытия модального окна
        document.getElementById('copyTasksModal').addEventListener('show.bs.modal', function () {
