@@ -176,228 +176,246 @@
     }
 </style>
 <script>
-   document.getElementById('filter-input').addEventListener('input', function () {
-       let searchTerm = this.value.toLowerCase();
-       let repositoryItems = document.querySelectorAll('.repository-item');
+   document.addEventListener('DOMContentLoaded', function () {
+       // Функция для триггера события change
+       function triggerChangeEvent(elementId) {
+           const element = document.getElementById(elementId);
+           if (element) {
+               const event = new Event('change');
+               element.dispatchEvent(event);
+           }
+       }
 
-       repositoryItems.forEach(function (item) {
-           let repositoryTitle = item.querySelector('a.fs-4').textContent.toLowerCase();
-           let repositoryDescription = item.querySelector('.card-text span')?.textContent.toLowerCase() || '';
+       // Обработчик для открытия модального окна
+       document.getElementById('copyTasksModal').addEventListener('show.bs.modal', function () {
+           triggerChangeEvent('source-repository');
+           triggerChangeEvent('target-repository');
+       });
 
-           if (repositoryTitle.includes(searchTerm) || repositoryDescription.includes(searchTerm)) {
-               item.style.display = '';
-           } else {
-               item.style.display = 'none';
+       // Существующие обработчики
+       document.getElementById('filter-input').addEventListener('input', function () {
+           let searchTerm = this.value.toLowerCase();
+           let repositoryItems = document.querySelectorAll('.repository-item');
+
+           repositoryItems.forEach(function (item) {
+               let repositoryTitle = item.querySelector('a.fs-4').textContent.toLowerCase();
+               let repositoryDescription = item.querySelector('.card-text span')?.textContent.toLowerCase() || '';
+
+               if (repositoryTitle.includes(searchTerm) || repositoryDescription.includes(searchTerm)) {
+                   item.style.display = '';
+               } else {
+                   item.style.display = 'none';
+               }
+           });
+       });
+
+       document.getElementById('source-repository').addEventListener('change', function () {
+           const sourceRepoId = this.value;
+           const suitesContainer = document.getElementById('suites-container');
+           suitesContainer.innerHTML = ''; // Очистить контейнер
+
+           if (sourceRepoId) {
+               fetch(`/repositories/${sourceRepoId}/suites`)
+                   .then(response => response.json())
+                   .then(data => {
+                       const createSuiteElement = (suite, level = 0) => {
+                           const container = document.createElement('div');
+                           container.classList.add('task-item');
+
+                           const title = document.createElement('div');
+                           title.classList.add('task-title');
+
+                           // Чекбокс для задач, которые не являются подзадачами
+                           if (suite.parent_id === null || suite.parent_id === undefined) {
+                               const suiteCheckbox = document.createElement('input');
+                               suiteCheckbox.type = 'checkbox';
+                               suiteCheckbox.name = 'suite_ids[]'; // Массив ID задач
+                               suiteCheckbox.value = suite.id;
+                               suiteCheckbox.id = `suite-${suite.id}`;
+                               suiteCheckbox.classList.add('form-check-input');
+
+                               const suiteLabel = document.createElement('label');
+                               suiteLabel.htmlFor = `suite-${suite.id}`;
+                               suiteLabel.textContent = suite.title;
+                               suiteLabel.classList.add('form-check-label');
+
+                               title.appendChild(suiteCheckbox);
+                               title.appendChild(suiteLabel);
+                           } else {
+                               const suiteLabel = document.createElement('label');
+                               suiteLabel.textContent = suite.title;
+                               suiteLabel.classList.add('form-check-label');
+                               title.appendChild(suiteLabel);
+                           }
+
+                           container.appendChild(title);
+
+                           // Создание контейнера для тест-кейсов
+                           const testCaseContainer = document.createElement('div');
+                           testCaseContainer.classList.add('test-case');
+                           testCaseContainer.style.paddingLeft = `${level * 20}px`;
+
+                           fetch(`/suites/${suite.id}/test-cases`)
+                               .then(response => response.json())
+                               .then(testCasesData => {
+                                   testCasesData.test_cases.forEach(testCase => {
+                                       const testCaseDiv = document.createElement('div');
+                                       testCaseDiv.classList.add('form-check');
+
+                                       const testCaseCheckbox = document.createElement('input');
+                                       testCaseCheckbox.type = 'checkbox';
+                                       testCaseCheckbox.name = 'test_case_ids[]'; // Массив ID тест-кейсов
+                                       testCaseCheckbox.value = testCase.id;
+                                       testCaseCheckbox.id = `testcase-${testCase.id}`;
+                                       testCaseCheckbox.classList.add('form-check-input', 'me-2');
+
+                                       const testCaseLabel = document.createElement('label');
+                                       testCaseLabel.htmlFor = `testcase-${testCase.id}`;
+                                       testCaseLabel.textContent = testCase.title;
+                                       testCaseLabel.classList.add('form-check-label');
+
+                                       testCaseDiv.appendChild(testCaseCheckbox);
+                                       testCaseDiv.appendChild(testCaseLabel);
+
+                                       testCaseContainer.appendChild(testCaseDiv);
+                                   });
+                               })
+                               .catch(error => {
+                                   console.error('Error fetching test cases:', error);
+                               });
+
+                           container.appendChild(testCaseContainer);
+
+                           // Подзадачи
+                           if (suite.children) {
+                               const childList = document.createElement('div');
+                               childList.classList.add('sub-task');
+                               suite.children.forEach(childSuite => {
+                                   const childItem = createSuiteElement(childSuite, level + 1);
+                                   childList.appendChild(childItem);
+                               });
+                               container.appendChild(childList);
+                           }
+
+                           return container;
+                       };
+
+                       data.suites.forEach(suite => {
+                           const suiteElement = createSuiteElement(suite);
+                           suitesContainer.appendChild(suiteElement);
+                       });
+                   })
+                   .catch(error => {
+                       console.error('Error fetching suites:', error);
+                   });
            }
        });
-   });
 
-   document.getElementById('source-repository').addEventListener('change', function () {
-       const sourceRepoId = this.value;
-       const suitesContainer = document.getElementById('suites-container');
-       suitesContainer.innerHTML = ''; // Очистить контейнер
+       document.getElementById('target-repository').addEventListener('change', function () {
+           const targetRepoId = this.value;
+           const targetSuitesContainer = document.getElementById('target-suites-container');
+           targetSuitesContainer.innerHTML = ''; // Очистить контейнер
 
-       if (sourceRepoId) {
-           fetch(`/repositories/${sourceRepoId}/suites`)
-               .then(response => response.json())
-               .then(data => {
-                   const createSuiteElement = (suite, level = 0) => {
-                       const container = document.createElement('div');
-                       container.classList.add('task-item');
+           if (targetRepoId) {
+               fetch(`/repositories/${targetRepoId}/suites`)
+                   .then(response => response.json())
+                   .then(data => {
+                       const createSuiteElement = (suite, level = 0) => {
+                           const container = document.createElement('div');
+                           container.classList.add('task-item');
 
-                       const title = document.createElement('div');
-                       title.classList.add('task-title');
+                           const title = document.createElement('div');
+                           title.classList.add('task-title');
 
-                       // Чекбокс для задач, которые не являются подзадачами
-                       if (suite.parent_id === null || suite.parent_id === undefined) {
-                           const suiteCheckbox = document.createElement('input');
-                           suiteCheckbox.type = 'checkbox';
-                           suiteCheckbox.name = 'suite_ids[]'; // Массив ID задач
-                           suiteCheckbox.value = suite.id;
-                           suiteCheckbox.id = `suite-${suite.id}`;
-                           suiteCheckbox.classList.add('form-check-input');
+                           // Основная радиокнопка задачи
+                           const suiteRadio = document.createElement('input');
+                           suiteRadio.type = 'radio';
+                           suiteRadio.name = 'target_suite_id'; // Один ID задачи для целевого репозитория
+                           suiteRadio.value = suite.id;
+                           suiteRadio.id = `target-suite-${suite.id}`;
+                           suiteRadio.classList.add('form-check-input');
 
                            const suiteLabel = document.createElement('label');
-                           suiteLabel.htmlFor = `suite-${suite.id}`;
+                           suiteLabel.htmlFor = `target-suite-${suite.id}`;
                            suiteLabel.textContent = suite.title;
                            suiteLabel.classList.add('form-check-label');
 
-                           title.appendChild(suiteCheckbox);
+                           title.appendChild(suiteRadio);
                            title.appendChild(suiteLabel);
-                       } else {
-                           const suiteLabel = document.createElement('label');
-                           suiteLabel.textContent = suite.title;
-                           suiteLabel.classList.add('form-check-label');
-                           title.appendChild(suiteLabel);
-                       }
+                           container.appendChild(title);
 
-                       container.appendChild(title);
-
-                       // Создание контейнера для тест-кейсов
-                       const testCaseContainer = document.createElement('div');
-                       testCaseContainer.classList.add('test-case');
-                       testCaseContainer.style.paddingLeft = `${level * 20}px`;
-
-                       fetch(`/suites/${suite.id}/test-cases`)
-                           .then(response => response.json())
-                           .then(testCasesData => {
-                               testCasesData.test_cases.forEach(testCase => {
-                                   const testCaseDiv = document.createElement('div');
-                                   testCaseDiv.classList.add('form-check');
-
-                                   const testCaseCheckbox = document.createElement('input');
-                                   testCaseCheckbox.type = 'checkbox';
-                                   testCaseCheckbox.name = 'test_case_ids[]'; // Массив ID тест-кейсов
-                                   testCaseCheckbox.value = testCase.id;
-                                   testCaseCheckbox.id = `testcase-${testCase.id}`;
-                                   testCaseCheckbox.classList.add('form-check-input', 'me-2');
-
-                                   const testCaseLabel = document.createElement('label');
-                                   testCaseLabel.htmlFor = `testcase-${testCase.id}`;
-                                   testCaseLabel.textContent = testCase.title;
-                                   testCaseLabel.classList.add('form-check-label');
-
-                                   testCaseDiv.appendChild(testCaseCheckbox);
-                                   testCaseDiv.appendChild(testCaseLabel);
-
-                                   testCaseContainer.appendChild(testCaseDiv);
+                           // Подзадачи
+                           if (suite.children) {
+                               const childList = document.createElement('div');
+                               childList.classList.add('sub-task');
+                               suite.children.forEach(childSuite => {
+                                   const childItem = createSuiteElement(childSuite, level + 1);
+                                   childList.appendChild(childItem);
                                });
-                           })
-                           .catch(error => {
-                               console.error('Error fetching test cases:', error);
-                           });
+                               container.appendChild(childList);
+                           }
 
-                       container.appendChild(testCaseContainer);
+                           return container;
+                       };
 
-                       // Подзадачи
-                       if (suite.children) {
-                           const childList = document.createElement('div');
-                           childList.classList.add('sub-task');
-                           suite.children.forEach(childSuite => {
-                               const childItem = createSuiteElement(childSuite, level + 1);
-                               childList.appendChild(childItem);
-                           });
-                           container.appendChild(childList);
-                       }
-
-                       return container;
-                   };
-
-                   data.suites.forEach(suite => {
-                       const suiteElement = createSuiteElement(suite);
-                       suitesContainer.appendChild(suiteElement);
+                       data.suites.forEach(suite => {
+                           const suiteElement = createSuiteElement(suite);
+                           targetSuitesContainer.appendChild(suiteElement);
+                       });
+                   })
+                   .catch(error => {
+                       console.error('Error fetching target suites:', error);
                    });
-               })
-               .catch(error => {
-                   console.error('Error fetching suites:', error);
-               });
-       }
-   });
-
-   document.getElementById('target-repository').addEventListener('change', function () {
-       const targetRepoId = this.value;
-       const targetSuitesContainer = document.getElementById('target-suites-container');
-       targetSuitesContainer.innerHTML = ''; // Очистить контейнер
-
-       if (targetRepoId) {
-           fetch(`/repositories/${targetRepoId}/suites`)
-               .then(response => response.json())
-               .then(data => {
-                   const createSuiteElement = (suite, level = 0) => {
-                       const container = document.createElement('div');
-                       container.classList.add('task-item');
-
-                       const title = document.createElement('div');
-                       title.classList.add('task-title');
-
-                       // Основная радиокнопка задачи
-                       const suiteRadio = document.createElement('input');
-                       suiteRadio.type = 'radio';
-                       suiteRadio.name = 'target_suite_id'; // Один ID задачи для целевого репозитория
-                       suiteRadio.value = suite.id;
-                       suiteRadio.id = `target-suite-${suite.id}`;
-                       suiteRadio.classList.add('form-check-input');
-
-                       const suiteLabel = document.createElement('label');
-                       suiteLabel.htmlFor = `target-suite-${suite.id}`;
-                       suiteLabel.textContent = suite.title;
-                       suiteLabel.classList.add('form-check-label');
-
-                       title.appendChild(suiteRadio);
-                       title.appendChild(suiteLabel);
-                       container.appendChild(title);
-
-                       // Подзадачи
-                       if (suite.children) {
-                           const childList = document.createElement('div');
-                           childList.classList.add('sub-task');
-                           suite.children.forEach(childSuite => {
-                               const childItem = createSuiteElement(childSuite, level + 1);
-                               childList.appendChild(childItem);
-                           });
-                           container.appendChild(childList);
-                       }
-
-                       return container;
-                   };
-
-                   data.suites.forEach(suite => {
-                       const suiteElement = createSuiteElement(suite);
-                       targetSuitesContainer.appendChild(suiteElement);
-                   });
-               })
-               .catch(error => {
-                   console.error('Error fetching target suites:', error);
-               });
-       }
-   });
-
-   document.getElementById('copy-tasks-form').addEventListener('submit', function (e) {
-       e.preventDefault(); // Предотвращает стандартное действие формы
-
-       const sourceRepoId = document.getElementById('source-repository').value;
-       const targetRepoId = document.getElementById('target-repository').value;
-
-       // Получаем данные формы
-       const formData = new FormData(this);
-
-       // Устанавливаем URL для запроса
-       const url = `{{ url('/copy-tasks') }}/${sourceRepoId}/${targetRepoId}`;
-
-       // Отправка AJAX-запроса
-       fetch(url, {
-           method: 'POST',
-           body: formData,
-           headers: {
-               'X-Requested-With': 'XMLHttpRequest', // Указывает, что запрос сделан через AJAX
-               'X-CSRF-TOKEN': '{{ csrf_token() }}' // Добавляет CSRF токен для защиты
            }
-       })
-       .then(response => {
-           if (!response.ok) {
-               // Если статус ответа не 2xx, выбрасываем ошибку
-               return response.json().then(data => Promise.reject(data));
-           }
-           return response.json();
-       })
-       .then(data => {
-           if (data.message) {
-               toastr.success(data.message); // Успешное уведомление
-               const modal = bootstrap.Modal.getInstance(document.getElementById('copyTasksModal'));
-               if (modal) {
-                   modal.hide(); // Закрытие модального окна
+       });
+
+       document.getElementById('copy-tasks-form').addEventListener('submit', function (e) {
+           e.preventDefault(); // Предотвращает стандартное действие формы
+
+           const sourceRepoId = document.getElementById('source-repository').value;
+           const targetRepoId = document.getElementById('target-repository').value;
+
+           // Получаем данные формы
+           const formData = new FormData(this);
+
+           // Устанавливаем URL для запроса
+           const url = `{{ url('/copy-tasks') }}/${sourceRepoId}/${targetRepoId}`;
+
+           // Отправка AJAX-запроса
+           fetch(url, {
+               method: 'POST',
+               body: formData,
+               headers: {
+                   'X-Requested-With': 'XMLHttpRequest', // Указывает, что запрос сделан через AJAX
+                   'X-CSRF-TOKEN': '{{ csrf_token() }}' // Добавляет CSRF токен для защиты
                }
-               // Обновляем страницу после успешного копирования
-               location.reload();
-           }
-       })
-       .catch(error => {
-           if (error.message) {
-               toastr.error(error.message); // Уведомление об ошибке
-           } else {
-               toastr.error('An error occurred. Please try again.'); // Общая ошибка
-           }
-           console.error('Error:', error);
+           })
+           .then(response => {
+               if (!response.ok) {
+                   // Если статус ответа не 2xx, выбрасываем ошибку
+                   return response.json().then(data => Promise.reject(data));
+               }
+               return response.json();
+           })
+           .then(data => {
+               if (data.message) {
+                   toastr.success(data.message); // Успешное уведомление
+                   const modal = bootstrap.Modal.getInstance(document.getElementById('copyTasksModal'));
+                   if (modal) {
+                       modal.hide(); // Закрытие модального окна
+                   }
+                   // Обновляем страницу после успешного копирования
+                   location.reload();
+               }
+           })
+           .catch(error => {
+               if (error.message) {
+                   toastr.error(error.message); // Уведомление об ошибке
+               } else {
+                   toastr.error('An error occurred. Please try again.'); // Общая ошибка
+               }
+               console.error('Error:', error);
+           });
        });
    });
 </script>
