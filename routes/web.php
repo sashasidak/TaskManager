@@ -12,6 +12,7 @@ use \App\Http\Controllers\AuthController;
 use \App\Http\Controllers\UsersController;
 use App\Http\Controllers\SuiteReportController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TaskCopyController;
 
 
 /**********************************************************************
@@ -91,6 +92,11 @@ Route::middleware(['auth'])->group(function () {
     /**********************************************************************
     // REPOSITORY
      ***********************************************************************/
+
+     Route::post('/copy-tasks/{sourceRepoId}/{targetRepoId}', [TaskCopyController::class, 'copyTasks'])->name('copy-tasks');
+     Route::get('/repositories/{repositoryId}/suites', [TaskCopyController::class, 'getSuitesByRepository']);
+     Route::get('/suites/{suiteId}/test-cases', [TaskCopyController::class, 'getTestCasesBySuite']);
+
 
     Route::get('/project/{project_id}/repositories', [RepositoryController::class, 'index'])
         ->where('project_id', '[0-9]+')
