@@ -169,7 +169,7 @@ class TaskCopyController extends Controller
             return response()->json(['message' => 'Selected tasks and test cases copied successfully.']);
         }
 
-        return response()->json(['message' => 'No valid data to copy.'], 400);
+        return response()->json(['message' => 'No valid data to copy: Якщо обрано тільки тест-кейси, обовʼязково мае бути обрана задача'], 400);
     }
 
     public function getTestCasesBySuite($suiteId)

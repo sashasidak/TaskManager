@@ -358,11 +358,50 @@
        const sourceRepoId = document.getElementById('source-repository').value;
        const targetRepoId = document.getElementById('target-repository').value;
 
-       // Установка URL для формы
-       this.action = `{{ url('/copy-tasks') }}/${sourceRepoId}/${targetRepoId}`;
+       // Получаем данные формы
+       const formData = new FormData(this);
 
-       // Отправка формы
-       this.submit();
+       // Устанавливаем URL для запроса
+       const url = `{{ url('/copy-tasks') }}/${sourceRepoId}/${targetRepoId}`;
+
+       // Отправка AJAX-запроса
+       fetch(url, {
+           method: 'POST',
+           body: formData,
+           headers: {
+               'X-Requested-With': 'XMLHttpRequest', // Указывает, что запрос сделан через AJAX
+               'X-CSRF-TOKEN': '{{ csrf_token() }}' // Добавляет CSRF токен для защиты
+           }
+       })
+       .then(response => {
+           if (!response.ok) {
+               // Если статус ответа не 2xx, выбрасываем ошибку
+               return response.json().then(data => Promise.reject(data));
+           }
+           return response.json();
+       })
+       .then(data => {
+           if (data.message) {
+               toastr.success(data.message); // Успешное уведомление
+               const modal = bootstrap.Modal.getInstance(document.getElementById('copyTasksModal'));
+               if (modal) {
+                   modal.hide(); // Закрытие модального окна
+               }
+               // Обновляем страницу после успешного копирования
+               location.reload();
+           }
+       })
+       .catch(error => {
+           if (error.message) {
+               toastr.error(error.message); // Уведомление об ошибке
+           } else {
+               toastr.error('An error occurred. Please try again.'); // Общая ошибка
+           }
+           console.error('Error:', error);
+       });
    });
 </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 @endsection
