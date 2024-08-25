@@ -1,4 +1,4 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
   libxml2-dev \
   zip \
   unzip \
+  wkhtmltopdf \
   vim && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tpm/* /var/tmp/*
