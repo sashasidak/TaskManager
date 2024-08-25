@@ -1,4 +1,4 @@
-# ABankTMS - Open Source Test Management System
+# TMS - Open Source Test Management System
 
 **ABankTMS** is open source test management software for managing test suites, test cases, test plans, test runs and documentation.
 
