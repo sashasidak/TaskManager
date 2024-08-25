@@ -16,36 +16,29 @@
             </a>
 
             {{-- <a href="{{route("test_plan_list_page", $project->id)}}" class="nav-link text-white">
-                            <i class="bi bi-journals"></i> Test Plans
-                        </a>  скрыл с бокового бара когда переделал содание test_run, убрав шаги с созданием Test_plan--}}
-
+                <i class="bi bi-journals"></i> Test Plans
+            </a>  скрыл с бокового бара когда переделал содание test_run, убрав шаги с созданием Test_plan--}}
 
             <a href="{{route("test_run_list_page", $project->id)}}" class="nav-link text-white">
                 <i class="bi bi-play-circle"></i> Test Runs
             </a>
 
-
-
             <a href="{{route("project_documents_list_page", $project->id)}}" class="nav-link text-white">
                 <i class="bi bi-file-text-fill"></i> Documents
             </a>
 
-
             <hr>
         @endif
-
 
         <a href="{{route("project_list_page")}}" class="nav-link text-white">
             <i class="bi bi-diagram-3-fill"></i>
             All Projects
         </a>
 
-
         <a href="{{route('users_list_page')}}" class="nav-link text-white">
             <i class="bi bi-people-fill"></i>
             Users
         </a>
-
 
         <hr>
 
@@ -54,6 +47,11 @@
             <b>Logout</b>
         </a>
 
-    </div>
+        <hr>
 
+        <div class="text-center text-white mt-4">
+            <small>Version 2.2.1</small>
+        </div>
+
+    </div>
 </div>
