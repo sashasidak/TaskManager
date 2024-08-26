@@ -1,5 +1,11 @@
 @extends('layout.base_layout')
 
+@section('head')
+    <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
+@endsection
+
 @section('content')
 
     @include('layout.sidebar_nav')
@@ -145,7 +151,6 @@
 
 @section('footer')
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             $("#filter-input").on('input', function() {
@@ -197,6 +202,15 @@
 
             window.location.href = url;
         }
+    </script>
+    <script>
+            $( document ).ready(function() {
+
+                $('#comment').summernote({
+                    minHeight: '200px',
+                });
+
+            });
     </script>
 
 @endsection

@@ -50,7 +50,7 @@
         <hr>
 
         <div class="text-center text-white mt-4">
-            <small>Version 2.2.3</small>
+            <small>Version 2.2.4</small>
         </div>
 
     </div>

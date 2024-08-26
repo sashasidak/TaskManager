@@ -159,7 +159,9 @@
         @if($comment)
             <div class="section">
                 <h3>Комментарий:</h3>
-                <p>{{ $comment }}</p>
+                    <div class="comment">
+                       {!! $comment !!}
+                    </div>
             </div>
         @endif
 
