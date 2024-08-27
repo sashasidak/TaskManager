@@ -23,6 +23,10 @@
                        title="Repository Settings">
                         <i class="bi bi-gear"></i>
                     </a>
+                    <!-- Collapse/Expand All Button -->
+                    <button class="btn btn-sm btn-outline-dark me-1" id="toggle-all-button" title="Collapse/Expand All">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
                 </div>
             @endcan
 
@@ -31,8 +35,9 @@
         <div id="filter-input-container" style="display: none; margin-bottom: 10px;">
             <input type="text" id="filter-input" class="form-control" placeholder="Введите для фильтрации...">
         </div>
+
         <!-- Progress Bar -->
-        <div class="progress mb-1" >
+        <div class="progress mb-1">
             @php
                 $total = array_sum($statusCounts);
                 $widths = [];
@@ -102,6 +107,46 @@
         });
 
         $(".badge.bg-secondary").first().click(); // select first untested case
+
+        // Function to toggle individual test cases
+        function toggleTestCases(button) {
+            var testCases = button.closest('.suite_header').nextElementSibling;
+            if (testCases.style.display === "none") {
+                testCases.style.display = "block";
+                button.innerHTML = '<i class="bi bi-chevron-down"></i>';
+            } else {
+                testCases.style.display = "none";
+                button.innerHTML = '<i class="bi bi-chevron-right"></i>';
+            }
+        }
+
+        // Function to toggle all test cases (collapse/expand)
+        function toggleAllTestCases() {
+            const isCollapsed = $("#toggle-all-button").data("collapsed");
+            $(".suite_header").each(function() {
+                const testCases = $(this).nextUntil('.suite_header');
+
+                if (isCollapsed) {
+                    testCases.show(); // Expand
+                    $(this).find('.toggle-button i').removeClass('bi-chevron-right').addClass('bi-chevron-down');
+                } else {
+                    testCases.hide(); // Collapse
+                    $(this).find('.toggle-button i').removeClass('bi-chevron-down').addClass('bi-chevron-right');
+                }
+            });
+
+            // Toggle the state
+            $("#toggle-all-button").data("collapsed", !isCollapsed);
+
+            // Update the icon on the global button
+            const icon = isCollapsed ? "bi-chevron-down" : "bi-chevron-right";
+            $("#toggle-all-button i").attr("class", `bi ${icon}`);
+        }
+
+        // Attach the toggle function to the button
+        $("#toggle-all-button").click(toggleAllTestCases);
+        // Initially set collapsed state to false
+        $("#toggle-all-button").data("collapsed", false);
     </script>
 
 @endsection

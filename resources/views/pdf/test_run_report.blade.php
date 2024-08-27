@@ -132,7 +132,10 @@
         <div class="additional-info">
             <h2>Дополнительная информация</h2>
             <p>Данные по смартфонам: {{ $smartphoneData }}</p>
-            <p>Комментарий: {{ $comment }}</p>
+            <p>Комментарий:</p>
+                    <div class="comment">
+                        {!! $comment !!}
+                    </div>
         </div>
     </div>
 </body>

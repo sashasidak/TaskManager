@@ -1,4 +1,8 @@
 <div class="tree_suite">
+@section('head')
+    <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
+@endsection
 
     @foreach($suites as $testSuite)
 
@@ -179,6 +183,15 @@
 
     document.addEventListener('DOMContentLoaded', updateSuiteTitles);
 </script>
+<script>
+            $( document ).ready(function() {
+
+                $('#comment').summernote({
+                    minHeight: '200px',
+                });
+
+            });
+    </script>
 
 <style>
     .toggle-button i, .pdf-button i {
