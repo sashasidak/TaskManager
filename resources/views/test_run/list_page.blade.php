@@ -96,24 +96,22 @@
                                                 <input type="text" id="smartphoneData" class="form-control" placeholder="Enter smartphone data...">
                                             </div>
 
-                                            <!-- Field for comment -->
-                                            <div class="mb-3">
-                                                <label for="comment" class="form-label">Comment</label>
-                                                <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="submitPdfReport(this)"
-                                                data-project-id="{{ $project->id }}"
-                                                data-test-run-id="{{ $testRun->id }}">
-                                            Generate PDF
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Field for comment -->
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comment</label>
+                            <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
                         </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitPdfReport(this)">
+                        Generate PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
                         <div class="border-top p-2">
                         <!-- Progress Bar -->
@@ -172,12 +170,18 @@
                 // Get the button that triggered the modal
                 var button = $(event.relatedTarget);
                 var descriptionId = button.data('description-id');
+                var projectId = button.data('project-id');
+                var testRunId = button.data('test-run-id');
 
                 // Get the description text
                 var descriptionText = $('#' + descriptionId).text().trim();
 
                 // Set the description in the hidden field
                 $('#hiddenDescription').val(descriptionText);
+
+                // Set project ID and test run ID in the modal button
+                $('#pdfReportModal').find('button.btn-primary').attr('data-project-id', projectId);
+                $('#pdfReportModal').find('button.btn-primary').attr('data-test-run-id', testRunId);
 
                 // Clear the form fields
                 $('#pdfReportForm')[0].reset();
