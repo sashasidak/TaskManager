@@ -21,15 +21,58 @@ class TaskCopyController extends Controller
         // Получаем данные из запроса
         $suiteIds = $request->input('suite_ids', []);
         $testCaseIds = $request->input('test_case_ids', []);
-        $targetSuiteId = $request->input('target_suite_id'); // Один ID задачи для целевого репозитория
+        $targetSuiteId = $request->input('target_suite_id');
 
-        \Log::info('Source Repository ID:', [$sourceRepoId]);
-        \Log::info('Target Repository ID:', [$targetRepoId]);
-        \Log::info('Suite IDs:', $suiteIds);
-        \Log::info('Test Case IDs:', $testCaseIds);
-        \Log::info('Target Suite ID:', [$targetSuiteId]);
+        // Массив для отслеживания старых и новых задач (включая подзадачи)
+        $suiteMapping = [];
 
-        // Если указаны только тест-кейсы и целевая задача
+        // Функция для рекурсивного копирования задач и их подзадач
+        $copySuite = function ($suite, $newParentId = null) use ($targetRepo, &$suiteMapping, &$copySuite, $testCaseIds) {
+            // Создаем копию задачи
+            $newSuite = $suite->replicate();
+            $newSuite->repository_id = $targetRepo->id;
+            $newSuite->parent_id = $newParentId;
+
+            if ($newSuite->save()) {
+                \Log::info('Copied Suite:', [$newSuite->id]);
+
+                // Сохраняем сопоставление старой и новой задачи
+                $suiteMapping[$suite->id] = $newSuite->id;
+
+                // Копируем подзадачи рекурсивно
+                $childSuites = Suite::where('parent_id', $suite->id)->get();
+                foreach ($childSuites as $childSuite) {
+                    $copySuite($childSuite, $newSuite->id);
+                }
+
+                // Копируем тест-кейсы только если они выбраны
+                if (!empty($testCaseIds)) {
+                    $testCases = TestCase::where('suite_id', $suite->id)->whereIn('id', $testCaseIds)->get();
+                    foreach ($testCases as $testCase) {
+                        $newTestCase = $testCase->replicate();
+                        $newTestCase->suite_id = $newSuite->id;
+
+                        if ($newTestCase->save()) {
+                            \Log::info('Copied Test Case:', [$newTestCase->id]);
+                        } else {
+                            \Log::error('Failed to Copy Test Case:', [$testCase->id]);
+                        }
+                    }
+                }
+            } else {
+                \Log::error('Failed to Copy Suite:', [$suite->id]);
+            }
+        };
+
+        // Копирование задач, если они указаны
+        if (!empty($suiteIds)) {
+            $sourceSuites = Suite::whereIn('id', $suiteIds)->get();
+            foreach ($sourceSuites as $suite) {
+                $copySuite($suite);
+            }
+        }
+
+        // Копирование тест-кейсов в существующую задачу
         if (!empty($testCaseIds) && !empty($targetSuiteId)) {
             // Проверяем существование целевой задачи
             $targetSuite = Suite::find($targetSuiteId);
@@ -42,10 +85,6 @@ class TaskCopyController extends Controller
 
             // Получаем тест-кейсы из исходного репозитория
             $sourceTestCases = TestCase::whereIn('id', $testCaseIds)->get();
-
-            \Log::info('Source Test Cases:', $sourceTestCases->toArray());
-
-            // Копирование тест-кейсов в целевую задачу
             foreach ($sourceTestCases as $testCase) {
                 $newTestCase = $testCase->replicate();
                 $newTestCase->suite_id = $targetSuite->id;
@@ -60,116 +99,44 @@ class TaskCopyController extends Controller
             return response()->json(['message' => 'Test cases copied successfully.']);
         }
 
-        // Если указаны только задачи
-        if (!empty($suiteIds) && empty($testCaseIds)) {
-            $sourceSuites = Suite::whereIn('id', $suiteIds)->get();
+        return response()->json(['message' => 'Selected tasks and test cases copied successfully.']);
+    }
 
-            foreach ($sourceSuites as $suite) {
-                $newSuite = $suite->replicate();
-                $newSuite->repository_id = $targetRepo->id;
 
-                if ($newSuite->save()) {
-                    \Log::info('Copied Suite:', [$newSuite->id]);
+    private function copySuiteWithChildren($suite, $targetRepoId, $testCaseIds)
+    {
+        // Копируем основную задачу
+        $newSuite = $suite->replicate();
+        $newSuite->repository_id = $targetRepoId;
+        $newSuite->parent_id = $suite->parent_id; // Сохраняем родительскую задачу
 
-                    // Копирование подзадач
-                    $childSuites = Suite::where('parent_id', $suite->id)->get();
-                    foreach ($childSuites as $childSuite) {
-                        $newChildSuite = $childSuite->replicate();
-                        $newChildSuite->parent_id = $newSuite->id; // Установка нового родительского ID
-                        $newChildSuite->repository_id = $targetRepo->id;
+        if ($newSuite->save()) {
+            \Log::info('Copied Suite:', [$newSuite->id]);
 
-                        if ($newChildSuite->save()) {
-                            \Log::info('Copied Child Suite:', [$newChildSuite->id]);
+            // Копируем тест-кейсы, если они принадлежат текущей задаче
+            $testCases = TestCase::where('suite_id', $suite->id)
+                                 ->whereIn('id', $testCaseIds)
+                                 ->get();
 
-                            // Копирование тест-кейсов для подзадачи
-                            $testCases = TestCase::whereIn('id', $testCaseIds)
-                                                 ->where('suite_id', $childSuite->id)
-                                                 ->get();
-                            foreach ($testCases as $testCase) {
-                                $newTestCase = $testCase->replicate();
-                                $newTestCase->suite_id = $newChildSuite->id;
+            foreach ($testCases as $testCase) {
+                $newTestCase = $testCase->replicate();
+                $newTestCase->suite_id = $newSuite->id;
 
-                                if ($newTestCase->save()) {
-                                    \Log::info('Copied Test Case to Child Suite:', [$newTestCase->id]);
-                                } else {
-                                    \Log::error('Failed to Copy Test Case to Child Suite:', [$testCase->id]);
-                                }
-                            }
-                        } else {
-                            \Log::error('Failed to Copy Child Suite:', [$childSuite->id]);
-                        }
-                    }
+                if ($newTestCase->save()) {
+                    \Log::info('Copied Test Case to Suite:', [$newTestCase->id]);
                 } else {
-                    \Log::error('Failed to Copy Suite:', [$suite->id]);
+                    \Log::error('Failed to Copy Test Case to Suite:', [$testCase->id]);
                 }
             }
 
-            return response()->json(['message' => 'Selected tasks copied successfully.']);
-        }
-
-        // Если указаны задачи и тест-кейсы
-        if (!empty($suiteIds) && !empty($testCaseIds)) {
-            $sourceSuites = Suite::whereIn('id', $suiteIds)->get();
-
-            foreach ($sourceSuites as $suite) {
-                $newSuite = $suite->replicate();
-                $newSuite->repository_id = $targetRepo->id;
-
-                if ($newSuite->save()) {
-                    \Log::info('Copied Suite:', [$newSuite->id]);
-
-                    // Копирование тест-кейсов для основной задачи
-                    $testCases = TestCase::whereIn('id', $testCaseIds)
-                                         ->where('suite_id', $suite->id)
-                                         ->get();
-                    foreach ($testCases as $testCase) {
-                        $newTestCase = $testCase->replicate();
-                        $newTestCase->suite_id = $newSuite->id;
-
-                        if ($newTestCase->save()) {
-                            \Log::info('Copied Test Case to Main Suite:', [$newTestCase->id]);
-                        } else {
-                            \Log::error('Failed to Copy Test Case to Main Suite:', [$testCase->id]);
-                        }
-                    }
-
-                    // Копирование подзадач
-                    $childSuites = Suite::where('parent_id', $suite->id)->get();
-                    foreach ($childSuites as $childSuite) {
-                        $newChildSuite = $childSuite->replicate();
-                        $newChildSuite->parent_id = $newSuite->id; // Установка нового родительского ID
-                        $newChildSuite->repository_id = $targetRepo->id;
-
-                        if ($newChildSuite->save()) {
-                            \Log::info('Copied Child Suite:', [$newChildSuite->id]);
-
-                            // Копирование тест-кейсов для подзадачи
-                            $testCases = TestCase::whereIn('id', $testCaseIds)
-                                                 ->where('suite_id', $childSuite->id)
-                                                 ->get();
-                            foreach ($testCases as $testCase) {
-                                $newTestCase = $testCase->replicate();
-                                $newTestCase->suite_id = $newChildSuite->id;
-
-                                if ($newTestCase->save()) {
-                                    \Log::info('Copied Test Case to Child Suite:', [$newTestCase->id]);
-                                } else {
-                                    \Log::error('Failed to Copy Test Case to Child Suite:', [$testCase->id]);
-                                }
-                            }
-                        } else {
-                            \Log::error('Failed to Copy Child Suite:', [$childSuite->id]);
-                        }
-                    }
-                } else {
-                    \Log::error('Failed to Copy Suite:', [$suite->id]);
-                }
+            // Находим подзадачи и копируем их рекурсивно
+            $childSuites = Suite::where('parent_id', $suite->id)->get();
+            foreach ($childSuites as $childSuite) {
+                $this->copySuiteWithChildren($childSuite, $targetRepoId, $testCaseIds);
             }
-
-            return response()->json(['message' => 'Selected tasks and test cases copied successfully.']);
+        } else {
+            \Log::error('Failed to Copy Suite:', [$suite->id]);
         }
-
-        return response()->json(['message' => 'No valid data to copy: Якщо обрано тільки тест-кейси, обовʼязково мае бути обрана задача'], 400);
     }
 
     public function getTestCasesBySuite($suiteId)
@@ -183,5 +150,4 @@ class TaskCopyController extends Controller
         $suites = Suite::where('repository_id', $repositoryId)->get();
         return response()->json(['suites' => $suites]);
     }
-
 }

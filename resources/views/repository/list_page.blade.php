@@ -253,12 +253,36 @@
                fetch(`/repositories/${sourceRepoId}/suites`)
                    .then(response => response.json())
                    .then(data => {
+                       // Функция для создания иерархии задач
+                       const buildHierarchy = (suites) => {
+                           const map = {};
+                           const roots = [];
+
+                           // Создаем карту задач по ID
+                           suites.forEach(suite => {
+                               map[suite.id] = { ...suite, children: [] };
+                           });
+
+                           // Определяем корневые задачи и подзадачи
+                           suites.forEach(suite => {
+                               if (suite.parent_id === null || suite.parent_id === undefined) {
+                                   roots.push(map[suite.id]);
+                               } else if (map[suite.parent_id]) {
+                                   map[suite.parent_id].children.push(map[suite.id]);
+                               }
+                           });
+
+                           return roots;
+                       };
+
+                       // Функция для создания элементов UI
                        const createSuiteElement = (suite, level = 0) => {
                            const container = document.createElement('div');
                            container.classList.add('task-item');
 
                            const title = document.createElement('div');
                            title.classList.add('task-title');
+                           title.style.paddingLeft = `${level * 20}px`; // Отступ для визуализации уровня вложенности
 
                            // Чекбокс для задач, которые не являются подзадачами
                            if (suite.parent_id === null || suite.parent_id === undefined) {
@@ -284,20 +308,19 @@
                            }
 
                            // Иконка "Select All"
-                                               const selectAllIcon = document.createElement('button');
-                                               selectAllIcon.innerHTML = '<i class="bi bi-check-all"></i>'; // Используем иконку Bootstrap Icons
-                                               selectAllIcon.classList.add('btn', 'btn-sm', 'btn-primary', 'ms-3', 'select-all-icon');
-                                               selectAllIcon.type = 'button'; // Убедитесь, что кнопка не вызывает отправку формы
-                                               selectAllIcon.addEventListener('click', () => {
-                                                   selectAllTestCases(testCaseContainer);
-                                               });
-                                               title.appendChild(selectAllIcon);
+                           const selectAllIcon = document.createElement('button');
+                           selectAllIcon.innerHTML = '<i class="bi bi-check-all"></i>'; // Используем иконку Bootstrap Icons
+                           selectAllIcon.classList.add('btn', 'btn-sm', 'btn-primary', 'ms-3', 'select-all-icon');
+                           selectAllIcon.type = 'button'; // Убедитесь, что кнопка не вызывает отправку формы
+                           selectAllIcon.addEventListener('click', () => {
+                               selectAllTestCases(testCaseContainer);
+                           });
+                           title.appendChild(selectAllIcon);
                            container.appendChild(title);
 
                            // Создание контейнера для тест-кейсов
                            const testCaseContainer = document.createElement('div');
                            testCaseContainer.classList.add('test-case');
-                           testCaseContainer.style.paddingLeft = `${level * 20}px`;
 
                            fetch(`/suites/${suite.id}/test-cases`)
                                .then(response => response.json())
@@ -330,14 +353,17 @@
 
                            container.appendChild(testCaseContainer);
 
-                           // Подзадачи
-                           if (suite.children) {
+                           // Создание контейнера для подзадач
+                           if (suite.children && suite.children.length > 0) {
                                const childList = document.createElement('div');
                                childList.classList.add('sub-task');
+
+                               // Создание подзадач в правильном порядке
                                suite.children.forEach(childSuite => {
                                    const childItem = createSuiteElement(childSuite, level + 1);
                                    childList.appendChild(childItem);
                                });
+
                                container.appendChild(childList);
                            }
 
@@ -349,7 +375,9 @@
                            checkboxes.forEach(checkbox => checkbox.checked = true);
                        };
 
-                       data.suites.forEach(suite => {
+                       // Построение и отображение всех задач
+                       const hierarchicalData = buildHierarchy(data.suites);
+                       hierarchicalData.forEach(suite => {
                            const suiteElement = createSuiteElement(suite);
                            suitesContainer.appendChild(suiteElement);
                        });
@@ -369,12 +397,36 @@
                fetch(`/repositories/${targetRepoId}/suites`)
                    .then(response => response.json())
                    .then(data => {
+                       // Функция для создания иерархии задач
+                       const buildHierarchy = (suites) => {
+                           const map = {};
+                           const roots = [];
+
+                           // Создаем карту задач по ID
+                           suites.forEach(suite => {
+                               map[suite.id] = { ...suite, children: [] };
+                           });
+
+                           // Определяем корневые задачи и подзадачи
+                           suites.forEach(suite => {
+                               if (suite.parent_id === null || suite.parent_id === undefined) {
+                                   roots.push(map[suite.id]);
+                               } else if (map[suite.parent_id]) {
+                                   map[suite.parent_id].children.push(map[suite.id]);
+                               }
+                           });
+
+                           return roots;
+                       };
+
+                       // Функция для создания элементов UI
                        const createSuiteElement = (suite, level = 0) => {
                            const container = document.createElement('div');
                            container.classList.add('task-item');
 
                            const title = document.createElement('div');
                            title.classList.add('task-title');
+                           title.style.paddingLeft = `${level * 20}px`; // Отступ для визуализации уровня вложенности
 
                            // Основная радиокнопка задачи
                            const suiteRadio = document.createElement('input');
@@ -393,21 +445,26 @@
                            title.appendChild(suiteLabel);
                            container.appendChild(title);
 
-                           // Подзадачи
-                           if (suite.children) {
+                           // Создание контейнера для подзадач
+                           if (suite.children && suite.children.length > 0) {
                                const childList = document.createElement('div');
                                childList.classList.add('sub-task');
+
+                               // Создание подзадач в правильном порядке
                                suite.children.forEach(childSuite => {
                                    const childItem = createSuiteElement(childSuite, level + 1);
                                    childList.appendChild(childItem);
                                });
+
                                container.appendChild(childList);
                            }
 
                            return container;
                        };
 
-                       data.suites.forEach(suite => {
+                       // Построение и отображение всех задач
+                       const hierarchicalData = buildHierarchy(data.suites);
+                       hierarchicalData.forEach(suite => {
                            const suiteElement = createSuiteElement(suite);
                            targetSuitesContainer.appendChild(suiteElement);
                        });
