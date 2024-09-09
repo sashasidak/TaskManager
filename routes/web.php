@@ -13,6 +13,7 @@ use \App\Http\Controllers\UsersController;
 use App\Http\Controllers\SuiteReportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TaskCopyController;
+use App\Http\Controllers\JiraController;
 
 
 /**********************************************************************
@@ -247,6 +248,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/test-plan/store', [TestPlanController::class, 'store'])->name('test_plan_store');
     Route::post('/test-run/update', [TestRunController::class, 'update'])->name("test_run_update");
     Route::post('/test-run/delete', [TestRunController::class, 'destroy'])->name("test_run_delete");
+
+     /**********************************************************************
+    // JIRA
+     ***********************************************************************/
+
+    Route::get('/jira-tasks', [JiraController::class, 'getCurrentUser'])->name('jira_tasks_page');
 
 
     /**********************************************************************
