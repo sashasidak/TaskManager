@@ -192,7 +192,33 @@
 
             });
     </script>
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+     document.querySelectorAll('.suite_title').forEach(function(element) {
+             let title = element.getAttribute('data-title');
+             let jiraIssueKeyMatch = title.match(/http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/);
 
+             if (jiraIssueKeyMatch) {
+                 let issueKey = jiraIssueKeyMatch[1];
+                 fetch(`/jira/issue-estimate/${issueKey}`)
+                     .then(response => response.json())
+                     .then(data => {
+                         if (data.status === 200) {
+                             let timeSpent = data.time_spent;
+                             let originalEstimate = data.original_estimate;
+                             let estimateBox = document.createElement('div');
+                             estimateBox.className = 'estimate-box';
+                             estimateBox.textContent = `${timeSpent}/${originalEstimate}`;
+                             element.appendChild(estimateBox);
+                         } else {
+                             console.error(`Error fetching estimate: ${data.error}`);
+                         }
+                     })
+                     .catch(error => console.error('Fetch error:', error));
+             }
+         });
+ });
+</script>
 <style>
     .toggle-button i, .pdf-button i {
         font-size: 16px;
@@ -217,4 +243,14 @@
     .toggle-button {
         right: 10px; /* Положение кнопки Collapse/Expand */
     }
+    .estimate-box {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #e0f7fa; /* Светло-синий фон */
+            color: #00796b; /* Тёмно-зелёный цвет текста */
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
 </style>
