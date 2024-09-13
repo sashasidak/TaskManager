@@ -254,6 +254,7 @@ Route::middleware(['auth'])->group(function () {
      ***********************************************************************/
 
     Route::get('/jira-tasks', [JiraController::class, 'getCurrentUser'])->name('jira_tasks_page');
+    Route::get('/jira-dashboard/{project_id?}', [JiraController::class, 'dashboard'])->name('jira_dashboard');
 
 
     /**********************************************************************

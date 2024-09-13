@@ -1,6 +1,19 @@
 <div class="col-auto sidebar shadow-sm">
     <div style="margin-top: 20px;">
 
+        <!-- Кнопка Jira Dashboard -->
+        @if(isset($project))
+            <a href="{{ route('jira_dashboard', ['project_id' => $project->id]) }}" class="nav-link text-white">
+                <i class="bi bi-kanban"></i> Jira Dashboard
+            </a>
+        @else
+            <a href="{{ route('jira_dashboard') }}" class="nav-link text-white">
+                <i class="bi bi-kanban"></i> Jira Dashboard
+            </a>
+        @endif
+
+        <hr>
+
         @if(isset($project))
             <a href="{{ route('project_show_page', $project->id) }}" class="nav-link text-white sidebar_project_title">
                 <i class="bi bi-kanban-fill"></i>
@@ -52,7 +65,7 @@
         <hr>
 
         <div class="text-center text-white mt-4">
-            <small>Version 3.0.0</small>
+            <small>Version 3.1.0</small>
         </div>
 
     </div>

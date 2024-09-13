@@ -53,7 +53,7 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => 'Admin', // Можно изменить имя на что-то подходящее
                     'email' => $email,
-                    'password' => Hash::make($password),
+                    'password' => $password,
                 ]);
             }
 
@@ -77,7 +77,7 @@ class AuthController extends Controller
                 $user = User::create([
                     'name' => $request->input('email'), // Используем имя из формы
                     'email' => $email,
-                    'password' => Hash::make($password),
+                    'password' => $password,
                 ]);
             }
 
