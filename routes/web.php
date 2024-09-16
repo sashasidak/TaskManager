@@ -256,6 +256,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jira-tasks', [JiraController::class, 'getCurrentUser'])->name('jira_tasks_page');
     Route::get('/jira-dashboard/{project_id?}', [JiraController::class, 'dashboard'])->name('jira_dashboard');
     Route::get('/jira/issue-estimate/{issueKey}', [JiraController::class, 'getIssueEstimate']);
+    Route::post('/jira/create-bug-report', [JiraController::class, 'createBugReport'])->name('jira.createBugReport');
+    Route::get('/jira/search-customer', [JiraController::class, 'searchCustomer'])->name('jira.searchCustomer');
+    Route::get('/jira/search-executor', [JiraController::class, 'searchExecutor'])->name('jira.searchExecutor');
 
 
     /**********************************************************************

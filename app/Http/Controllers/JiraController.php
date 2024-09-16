@@ -97,14 +97,12 @@ public function getIssueEstimate($issueKey)
     $headers = ['Authorization' => 'Basic ' . $credentials];
     $url = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}";
 
-    Log::info('JiraController: Sending request to Jira', ['url' => $url, 'headers' => $headers]);
 
     try {
         $response = Http::withHeaders($headers)
             ->accept('application/json')
             ->get($url);
 
-        Log::info('JiraController: Received response from Jira', ['status' => $response->status(), 'response_body' => $response->body()]);
 
         if ($response->successful()) {
             $issueData = $response->json();
@@ -125,6 +123,277 @@ public function getIssueEstimate($issueKey)
     } catch (\Exception $e) {
         Log::error('JiraController: Exception occurred while fetching issue data', ['exception' => $e->getMessage()]);
         return ['status' => 500, 'error' => 'An unexpected error occurred while fetching data from Jira.'];
+    }
+}
+
+public function getIssueId($issueKey)
+{
+    $email = auth()->user()->name;
+    $password = auth()->user()->password;
+
+    if (empty($email) || empty($password)) {
+        Log::error('JiraController: Missing Jira credentials.');
+        return null;
+    }
+
+    $credentials = base64_encode($email . ':' . $password);
+    $headers = ['Authorization' => 'Basic ' . $credentials];
+    $url = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}"; // Используем HTTP
+
+    try {
+        $response = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->get($url);
+
+        if ($response->successful()) {
+            $issueData = $response->json();
+            return $issueData['id']; // Получаем ID задачи
+        } else {
+            Log::error('JiraController: Failed to get issue data.', ['response_body' => $response->body()]);
+            return null;
+        }
+    } catch (\Exception $e) {
+        Log::error('JiraController: Exception occurred while getting issue data', ['exception' => $e->getMessage()]);
+        return null;
+    }
+}
+
+public function createBugReport(Request $request)
+{
+    $email = auth()->user()->name;
+    $password = auth()->user()->password;
+
+    if (empty($email) || empty($password)) {
+        Log::error('JiraController: Missing Jira credentials.');
+        return back()->withErrors(['error' => 'Jira credentials are missing.']);
+    }
+
+    $credentials = base64_encode($email . ':' . $password);
+    $headers = ['Authorization' => 'Basic ' . $credentials];
+    $issueKey = $request->issue_key; // Ключ существующей задачи для получения информации о проекте
+
+    // Получаем данные о существующей задаче
+    $issueUrl = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}";
+
+    Log::info('JiraController: Sending request to get existing issue data', ['url' => $issueUrl, 'headers' => $headers]);
+
+    try {
+        $issueResponse = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->get($issueUrl);
+
+        if (!$issueResponse->successful()) {
+            Log::error('JiraController: Failed to get existing issue data', ['status' => $issueResponse->status(), 'response_body' => $issueResponse->body()]);
+            return back()->withErrors(['error' => 'Error fetching existing issue data from Jira.']);
+        }
+
+        $issueData = $issueResponse->json();
+        $projectKey = $issueData['fields']['project']['key'] ?? null;
+        $fixVersions = $issueData['fields']['fixVersions'] ?? []; // Получаем значение "Исправить в версиях"
+        $epicLink = $issueData['fields']['customfield_10000'] ?? null; // Получаем значение "Epic Link"
+
+        if (!$projectKey) {
+            Log::error('JiraController: Project key not found in existing issue data.');
+            return back()->withErrors(['error' => 'Unable to retrieve project key from existing issue.']);
+        }
+
+        // Получаем список всех полей
+        $fieldsUrl = "http://{$this->jiraDomain}/rest/api/2/field";
+
+        Log::info('JiraController: Sending request to get all fields', ['url' => $fieldsUrl, 'headers' => $headers]);
+
+        $fieldsResponse = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->get($fieldsUrl);
+
+        if ($fieldsResponse->successful()) {
+            Log::info('JiraController: Received fields data from Jira', ['response_body' => $fieldsResponse->body()]);
+        } else {
+            Log::error('JiraController: Failed to get fields data from Jira', ['status' => $fieldsResponse->status(), 'response_body' => $fieldsResponse->body()]);
+        }
+
+        // Преобразуем ключи к верхнему регистру
+        $customerKey = strtoupper($request->customer_key);
+        $executorKey = strtoupper($request->executor_key);
+        $severity = $request->severity; // Получаем выбранную серьезность
+
+        // Создаем новую задачу
+        $createUrl = "http://{$this->jiraDomain}/rest/api/2/issue";
+        $createData = [
+            'fields' => [
+                'project' => [
+                    'key' => $projectKey
+                ],
+                'summary' => $request->subject, // Передаем тему из формы
+                'description' => "Шаги:\n" . $request->steps . "\n\nФактический результат:\n" . $request->actual_result . "\n\nОжидаемый результат:\n" . $request->expected_result,
+                'issuetype' => [
+                    'id' => '10803' // ID типа задачи для баг-репорта
+                ],
+                // Устанавливаем заказчика и исполнителя
+                'customfield_10210' => [
+                    'name' => $customerKey // Передаем ключ заказчика в верхнем регистре
+                ],
+                'assignee' => [
+                    'name' => $executorKey // Передаем ключ исполнителя в верхнем регистре
+                ],
+                // Добавляем устройство как customfield_11023
+                'customfield_11023' => $request->device, // Передаем значение устройства из формы
+                // Передаем значения "Исправить в версиях"
+                'fixVersions' => array_map(function($version) {
+                    return ['id' => $version['id']];
+                }, $fixVersions),
+                // Передаем "Epic Link"
+                'customfield_10000' => $epicLink,
+                // Передаем серьезность
+                'customfield_10300' => [
+                    'id' => $severity // Передаем ID серьезности
+                ],
+            ]
+        ];
+
+        Log::info('JiraController: Sending create issue request', ['url' => $createUrl, 'headers' => $headers, 'data' => $createData]);
+
+        $createResponse = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->post($createUrl, $createData);
+
+        Log::info('JiraController: Received response from Jira', ['status' => $createResponse->status(), 'response_body' => $createResponse->body()]);
+
+        if ($createResponse->status() == 201) {
+            $newIssueKey = $createResponse->json()['key']; // Получаем ключ новой задачи
+
+            // Устанавливаем связь между задачами
+            $this->linkIssues($issueKey, $newIssueKey, $headers);
+
+            return back()->with('success', 'Задача успешно создана в Jira и связана с существующей задачей!');
+        } else {
+            Log::error('JiraController: Failed to create issue in Jira.', ['response_body' => $createResponse->body()]);
+            return back()->withErrors(['error' => 'Error creating issue in Jira.']);
+        }
+    } catch (\Exception $e) {
+        Log::error('JiraController: Exception occurred while creating issue', ['exception' => $e->getMessage()]);
+        return back()->withErrors(['error' => 'An unexpected error occurred while creating issue in Jira.']);
+    }
+}
+
+
+private function linkIssues($sourceIssueKey, $targetIssueKey, $headers)
+{
+    $url = "http://{$this->jiraDomain}/rest/api/2/issueLink";
+
+    $data = [
+        'type' => [
+            'id' => '10401' // Используем ID типа связи
+        ],
+        'inwardIssue' => [
+            'key' => $sourceIssueKey
+        ],
+        'outwardIssue' => [
+            'key' => $targetIssueKey
+        ]
+    ];
+
+    Log::info('JiraController: Sending request to link issues', ['url' => $url, 'headers' => $headers, 'data' => $data]);
+
+    try {
+        $response = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->post($url, $data);
+
+        Log::info('JiraController: Received response from Jira', ['status' => $response->status(), 'response_body' => $response->body()]);
+
+        if ($response->status() == 200) {
+            Log::info('JiraController: Issues successfully linked.');
+        } else {
+            Log::error('JiraController: Failed to link issues.', ['response_body' => $response->body()]);
+        }
+    } catch (\Exception $e) {
+        Log::error('JiraController: Exception occurred while linking issues', ['exception' => $e->getMessage()]);
+    }
+}
+
+public function searchCustomer(Request $request)
+{
+    $query = $request->input('query');
+    $email = auth()->user()->name;
+    $password = auth()->user()->password;
+
+    if (empty($email) || empty($password)) {
+        Log::error('JiraController: Missing Jira credentials for searchCustomer.');
+        return response()->json(['error' => 'Jira credentials are missing.'], 401);
+    }
+
+    $credentials = base64_encode($email . ':' . $password);
+    $headers = ['Authorization' => 'Basic ' . $credentials];
+
+    // URL для поиска пользователя по имени
+    $url = "http://{$this->jiraDomain}/rest/api/2/user/search?username=" . urlencode($query);
+
+    try {
+        $response = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->get($url);
+
+        // Логирование тела ответа
+        Log::info('JiraController: Response from Jira (searchCustomer)', [
+            'status' => $response->status(),
+            'response_body' => $response->body()
+        ]);
+
+        if (!$response->successful()) {
+            Log::error('JiraController: Failed to search for customers.', ['status' => $response->status(), 'response_body' => $response->body()]);
+            return response()->json(['error' => 'Error searching for customers.'], $response->status());
+        }
+
+        $users = $response->json();
+
+        return response()->json($users, 200);
+
+    } catch (\Exception $e) {
+        Log::error('JiraController: Exception occurred during customer search', ['exception' => $e->getMessage()]);
+        return response()->json(['error' => 'An unexpected error occurred while searching for customers.'], 500);
+    }
+}
+
+public function searchExecutor(Request $request)
+{
+    $query = $request->input('query');
+    $email = auth()->user()->name;
+    $password = auth()->user()->password;
+
+    if (empty($email) || empty($password)) {
+        Log::error('JiraController: Missing Jira credentials for searchExecutor.');
+        return response()->json(['error' => 'Jira credentials are missing.'], 401);
+    }
+
+    $credentials = base64_encode($email . ':' . $password);
+    $headers = ['Authorization' => 'Basic ' . $credentials];
+
+    // URL для поиска исполнителя по имени
+    $url = "http://{$this->jiraDomain}/rest/api/2/user/search?username=" . urlencode($query);
+
+    try {
+        $response = Http::withHeaders($headers)
+            ->accept('application/json')
+            ->get($url);
+
+        Log::info('JiraController: Response from Jira (searchExecutor)', [
+            'status' => $response->status(),
+            'response_body' => $response->body()
+        ]);
+
+        if (!$response->successful()) {
+            Log::error('JiraController: Failed to search for executors.', ['status' => $response->status(), 'response_body' => $response->body()]);
+            return response()->json(['error' => 'Error searching for executors.'], $response->status());
+        }
+
+        $users = $response->json();
+
+        return response()->json($users, 200);
+
+    } catch (\Exception $e) {
+        Log::error('JiraController: Exception occurred during executor search', ['exception' => $e->getMessage()]);
+        return response()->json(['error' => 'An unexpected error occurred while searching for executors.'], 500);
     }
 }
 

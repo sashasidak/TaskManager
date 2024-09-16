@@ -18,6 +18,14 @@
             </span>
             <span class="suite_title" data-title="{{$testSuite->title}}" style="padding-right: 70px;">{{$testSuite->title}}</span>
 
+         {{-- Bugreport Button (appears if Jira link is present) --}}
+         <button class="bugreport-button" style="position: absolute; right: 90px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+             <i class="bi bi-bug"></i>
+         </button>
+
+         {{-- Подключаем overlay --}}
+         @include('jira.bug_report_overlay')
+
             {{-- PDF Report Button (only for top-level suites) --}}
             @if($testSuite->parent_id === null)  <!-- Adjust condition based on your logic -->
             <button class="pdf-button" onclick="generatePdfReport({{$project->id}}, {{$testRun->id}}, {{$testSuite->id}})" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
@@ -181,7 +189,49 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', updateSuiteTitles);
+    function checkForJiraLinks() {
+        // Сначала скрываем все кнопки багрепорта
+        document.querySelectorAll('.bugreport-button').forEach(function(button) {
+            button.style.display = 'none';
+        });
+
+        // Проверяем каждый элемент с классом '.suite_title'
+        document.querySelectorAll('.suite_title').forEach(function(element) {
+            let title = element.getAttribute('data-title');
+            if (title && title.includes('jira.ab.loc')) {
+                // Ищем ближайший элемент с классом '.suite_header'
+                let suiteHeader = element.closest('.suite_header');
+                if (suiteHeader) {
+                    let bugReportButton = suiteHeader.querySelector('.bugreport-button');
+
+                    // Если кнопка найдена, показываем ее
+                    if (bugReportButton) {
+                        bugReportButton.style.display = 'block';
+
+                        // Ищем ключ задачи в ссылке
+                        let jiraIssueKeyMatch = title.match(/http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/);
+                        if (jiraIssueKeyMatch) {
+                            let issueKey = jiraIssueKeyMatch[1];
+
+                            // Добавляем обработчик клика для кнопки багрепорта
+                            bugReportButton.addEventListener('click', function() {
+                                let issueKeyInput = document.querySelector('#issueKey');
+                                issueKeyInput.value = issueKey;
+
+                                // Открываем оверлей с формой багрепорта
+                                document.querySelector('.overlay').style.display = 'block';
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSuiteTitles();
+        checkForJiraLinks();
+    });
 </script>
 <script>
             $( document ).ready(function() {
@@ -218,15 +268,29 @@
              }
          });
  });
+ // Находим элементы
+     const bugReportButton = document.querySelector('.bugreport-button');
+     const overlay = document.querySelector('.overlay');
+     const closeOverlayButton = document.querySelector('.close-overlay');
+
+     // Показать overlay при нажатии на кнопку
+     bugReportButton.addEventListener('click', () => {
+         overlay.style.display = 'flex';
+     });
+
+     // Скрыть overlay при нажатии на кнопку закрытия
+     closeOverlayButton.addEventListener('click', () => {
+         overlay.style.display = 'none';
+     });
 </script>
 <style>
-    .toggle-button i, .pdf-button i {
+    .toggle-button i, .pdf-button i, .bugreport-button i {
         font-size: 16px;
         color: darkgray;
     }
 
     .suite_header {
-        padding-right: 80px; /* Добавляем пространство справа для кнопок */
+        padding-right: 110px; /* Добавляем пространство справа для кнопок */
     }
 
     .pdf-button {
@@ -253,4 +317,32 @@
             font-weight: bold;
             margin-left: 10px;
         }
+        /* Стили для overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .overlay-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .close-overlay {
+            background: none;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
 </style>
