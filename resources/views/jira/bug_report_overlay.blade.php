@@ -115,15 +115,15 @@
     overflow-y: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     position: relative;
-    transform: translate(450px, 50px); /* Смещение вправо и вниз */
+    transform: translate(450px, 50px);
 }
 
 .overlay-content h2 {
-    margin: 0 auto; /* Центрируем заголовок по горизонтали */
-    flex-grow: 1; /* Позволяем заголовку занимать доступное пространство */
-    text-align: center; /* Дополнительное выравнивание текста в центре */
-    margin-left: -150px; /* Подвиньте текст левее */
-     z-index: 1;
+    margin: 0 auto;
+    flex-grow: 1;
+    text-align: center;
+    margin-left: -150px;
+    z-index: 1;
 }
 
 .close-overlay {
@@ -135,47 +135,41 @@
     border: none;
     padding: 5px 10px;
     border-radius: 4px;
-     z-index: 999
+    z-index: 999;
 }
 
 .error-type-select {
-    width: 150px !important; /* Устанавливаем адекватную ширину для дропдауна */
-    flex-shrink: 0; /* Запрещаем сужение дропдауна при изменении размера */
+    width: 150px !important;
+    flex-shrink: 0;
     z-index: 2;
 }
 
 .platform-select,
 .severity-select {
-    width: 1px; /* Уменьшенная ширина дропдаунов "Платформа" и "Серьезность" */
+    flex: 0 1 auto; /* Делаем так, чтобы элементы могли сжиматься, но не расширяться */
+    margin-right: 5px; /* Минимальный отступ между элементами */
 }
 
 .form-row {
     display: flex;
-    justify-content: space-between;
+    align-items: center; /* Центрируем элементы по вертикали */
+    gap: 0; /* Убираем промежутки между элементами */
 }
 
 .form-group {
-    margin-bottom: 1px;
-}
-
-.form-group select,
-.form-group input {
-    width: 100%;
+    margin-bottom: 0; /* Убираем нижние отступы у групп */
 }
 
 .platform-group,
 .severity-group {
-    margin-right: 5px; /* Минимальный отступ между элементами */
-}
-.form-group.d-flex {
-    display: flex;
-    justify-content: space-between; /* Равномерно распределяем элементы по горизонтали */
-    align-items: center; /* Центрируем элементы по вертикали */
+    flex: 0 1 auto; /* Делаем элементы гибкими, чтобы занимали только необходимое пространство */
 }
 
 .subject-group {
-    flex-grow: 3;
+    flex: 1; /* Поле "Тема" будет занимать оставшееся пространство */
+    margin-left: 5px; /* Небольшой отступ слева для отделения от предыдущих элементов */
 }
+
 </style>
 
 <script>
@@ -184,6 +178,49 @@ $(document).ready(function() {
     let currentQueryExecutor = ''; // Хранение текущего запроса для исполнителя
     let currentRequestCustomer = null; // Хранение текущего запроса Ajax для заказчика
     let currentRequestExecutor = null; // Хранение текущего запроса Ajax для исполнителя
+
+    // Загрузка данных из Local Storage
+    function loadFormData() {
+        const formData = JSON.parse(localStorage.getItem('overlayFormData')) || {};
+
+        $('#platform').val(formData.platform || '');
+        $('#severity').val(formData.severity || '');
+        $('#subject').val(formData.subject || '');
+        $('#steps').val(formData.steps || '');
+        $('#actual_result').val(formData.actual_result || '');
+        $('#expected_result').val(formData.expected_result || '');
+        $('#device').val(formData.device || '');
+        $('#executor').val(formData.executor || '');
+        $('#customer').val(formData.customer || '');
+        $('#errorType').val(formData.error_type || '');
+
+        if (formData.executorKey) {
+            $('#executorKey').val(formData.executorKey);
+        }
+
+        if (formData.customerKey) {
+            $('#customerKey').val(formData.customerKey);
+        }
+    }
+
+    // Сохранение данных в Local Storage
+    function saveFormData() {
+        const formData = {
+            platform: $('#platform').val(),
+            severity: $('#severity').val(),
+            subject: $('#subject').val(),
+            steps: $('#steps').val(),
+            actual_result: $('#actual_result').val(),
+            expected_result: $('#expected_result').val(),
+            device: $('#device').val(),
+            executor: $('#executor').val(),
+            customer: $('#customer').val(),
+            error_type: $('#errorType').val(),
+            executorKey: $('#executorKey').val(),
+            customerKey: $('#customerKey').val(),
+        };
+        localStorage.setItem('overlayFormData', JSON.stringify(formData));
+    }
 
     // Функция для создания дебаунса
     function debounce(func, delay) {
@@ -195,6 +232,19 @@ $(document).ready(function() {
             }, delay);
         };
     }
+
+    // Обработчик события изменения полей формы с сохранением в Local Storage
+    const debouncedSave = debounce(saveFormData, 300);
+    $('#platform, #severity, #subject, #steps, #actual_result, #expected_result, #device, #executor, #customer, #errorType').on('input change', debouncedSave);
+
+    // Применение дебаунса для ввода в поле заказчика
+    $('#customer').on('input', debounce(searchCustomer, 300));
+
+    // Применение дебаунса для ввода в поле исполнителя
+    $('#executor').on('input', debounce(searchExecutor, 300));
+
+    // Загрузка данных при загрузке страницы
+    loadFormData();
 
     // Функция для поиска заказчика
     function searchCustomer() {
