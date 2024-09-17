@@ -205,7 +205,7 @@ public function createBugReport(Request $request)
         $issueTypeId = '';
 
         if ($errorType === 'bug_fix') {
-            $issueTypeId = '10308';
+            $issueTypeId = '10803';
         } elseif ($errorType === 'design_issue') {
             $issueTypeId = '11700';
         }
@@ -274,6 +274,9 @@ public function createBugReport(Request $request)
             // Устанавливаем связь между задачами
             $this->linkIssues($issueKey, $newIssueKey, $headers);
 
+            // Обрабатываем вложенные файлы
+            $this->handleAttachments($request->file('attachments'), $newIssueKey, $headers);
+
             return back()->with('success', 'Задача успешно создана в Jira и связана с существующей задачей!');
         } else {
             Log::error('JiraController: Failed to create issue in Jira.', ['response_body' => $createResponse->body()]);
@@ -284,6 +287,32 @@ public function createBugReport(Request $request)
         return back()->withErrors(['error' => 'An unexpected error occurred while creating issue in Jira.']);
     }
 }
+
+private function handleAttachments($files, $issueKey, $headers)
+{
+    if (!$files) {
+        return;
+    }
+
+    $url = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}/attachments";
+
+    foreach ($files as $file) {
+        try {
+            $response = Http::withHeaders(array_merge($headers, ['X-Atlassian-Token' => 'no-check']))
+                ->attach('file', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
+                ->post($url);
+
+            Log::info('JiraController: Received response from Jira (attachment)', ['status' => $response->status(), 'response_body' => $response->body()]);
+
+            if (!$response->successful()) {
+                Log::error('JiraController: Failed to attach file.', ['response_body' => $response->body()]);
+            }
+        } catch (\Exception $e) {
+            Log::error('JiraController: Exception occurred while attaching file', ['exception' => $e->getMessage()]);
+        }
+    }
+}
+
 
 
 private function linkIssues($sourceIssueKey, $targetIssueKey, $headers)
@@ -311,7 +340,7 @@ private function linkIssues($sourceIssueKey, $targetIssueKey, $headers)
 
         Log::info('JiraController: Received response from Jira', ['status' => $response->status(), 'response_body' => $response->body()]);
 
-        if ($response->status() == 200) {
+        if ($response->status() == 201) {
             Log::info('JiraController: Issues successfully linked.');
         } else {
             Log::error('JiraController: Failed to link issues.', ['response_body' => $response->body()]);

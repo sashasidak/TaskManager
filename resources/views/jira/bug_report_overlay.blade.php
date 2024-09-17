@@ -3,23 +3,23 @@
     <div class="overlay-content">
         <!-- Дропбокс с выбором типа ошибки (слева) -->
         <div class="form-group d-flex justify-content-between align-items-center mb-4">
-            <select id="errorType" name="error_type" class="form-control error-type-select">
-                  <option value="bug_fix">Исправление ошибки</option>
-                  <option value="design_issue">Ошибка дизайна</option>
-            </select>
             <h2 class="ml-3">Сообщить об ошибке</h2>
             <button type="button" class="close-overlay btn btn-secondary ml-auto">Закрыть</button>
         </div>
 
-        <form action="{{ route('jira.createBugReport') }}" method="POST">
+        <form action="{{ route('jira.createBugReport') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Скрытые поля -->
             <input type="hidden" id="issueKey" name="issue_key">
             <input type="hidden" id="customerKey" name="customer_key">
             <input type="hidden" id="executorKey" name="executor_key">
-            <input type="hidden" id="errorTypeHidden" name="error_type">
+            <input type="file" name="attachments[]" multiple>
 
+             <select id="errorType" name="error_type" class="form-control error-type-select">
+                  <option value="bug_fix">Исправление ошибки</option>
+                  <option value="design_issue">Ошибка дизайна</option>
+            </select>
             <!-- Платформа, Серьезность и Тема в одной строке -->
             <div class="form-row d-flex justify-content-between mb-3">
                 <div class="form-group col-md-2 platform-group">
@@ -382,5 +382,14 @@ $(document).ready(function() {
     $(document).on('click', '.open-overlay', function() {
         $('.overlay').show();
     });
+
+    // Отображение выбранных файлов
+            $('#files').on('change', function() {
+                const files = $(this)[0].files;
+                if (files.length) {
+                    let fileNames = Array.from(files).map(file => file.name).join(', ');
+                    alert('Вы выбрали файлы: ' + fileNames);
+                }
+            });
 });
 </script>
