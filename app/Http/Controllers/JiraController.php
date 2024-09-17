@@ -197,25 +197,34 @@ public function createBugReport(Request $request)
             return back()->withErrors(['error' => 'Unable to retrieve project key from existing issue.']);
         }
 
-        // Получаем список всех полей
-        $fieldsUrl = "http://{$this->jiraDomain}/rest/api/2/field";
-
-        Log::info('JiraController: Sending request to get all fields', ['url' => $fieldsUrl, 'headers' => $headers]);
-
-        $fieldsResponse = Http::withHeaders($headers)
-            ->accept('application/json')
-            ->get($fieldsUrl);
-
-        if ($fieldsResponse->successful()) {
-            Log::info('JiraController: Received fields data from Jira', ['response_body' => $fieldsResponse->body()]);
-        } else {
-            Log::error('JiraController: Failed to get fields data from Jira', ['status' => $fieldsResponse->status(), 'response_body' => $fieldsResponse->body()]);
-        }
-
-        // Преобразуем ключи к верхнему регистру
         $customerKey = strtoupper($request->customer_key);
         $executorKey = strtoupper($request->executor_key);
-        $severity = $request->severity; // Получаем выбранную серьезность
+        $severity = $request->severity;
+        $platform = strtoupper($request->platform);
+        $errorType = $request->error_type;
+        $issueTypeId = '';
+
+        if ($errorType === 'bug_fix') {
+            $issueTypeId = '10308';
+        } elseif ($errorType === 'design_issue') {
+            $issueTypeId = '11700';
+        }
+
+        // Определение серьезности (severity) для вставки в summary
+        $severityMap = [
+            '10200' => 'S1',
+            '10201' => 'S2',
+            '10202' => 'S3',
+            '10203' => 'S4',
+            '10204' => 'S5',
+            '-1'    => 'Not Selected'
+        ];
+
+        // Получаем значение S# в зависимости от severity
+        $severityLabel = $severityMap[$severity] ?? 'Unknown';
+
+        // Формируем summary
+        $summary = "[{$platform}][{$severityLabel}] {$request->subject}";
 
         // Создаем новую задачу
         $createUrl = "http://{$this->jiraDomain}/rest/api/2/issue";
@@ -224,10 +233,10 @@ public function createBugReport(Request $request)
                 'project' => [
                     'key' => $projectKey
                 ],
-                'summary' => $request->subject, // Передаем тему из формы
+                'summary' => $summary, // Используем сформированный summary
                 'description' => "Шаги:\n" . $request->steps . "\n\nФактический результат:\n" . $request->actual_result . "\n\nОжидаемый результат:\n" . $request->expected_result,
                 'issuetype' => [
-                    'id' => '10803' // ID типа задачи для баг-репорта
+                    'id' => $issueTypeId
                 ],
                 // Устанавливаем заказчика и исполнителя
                 'customfield_10210' => [

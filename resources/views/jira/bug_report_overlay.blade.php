@@ -1,44 +1,50 @@
 <!-- components/overlay.blade.php -->
 <div class="overlay" style="display: none;">
     <div class="overlay-content">
-        <h2>Сообщить об ошибке</h2>
+        <!-- Дропбокс с выбором типа ошибки (слева) -->
+        <div class="form-group d-flex justify-content-between align-items-center mb-4">
+            <select id="errorType" name="error_type" class="form-control error-type-select">
+                  <option value="bug_fix">Исправление ошибки</option>
+                  <option value="design_issue">Ошибка дизайна</option>
+            </select>
+            <h2 class="ml-3">Сообщить об ошибке</h2>
+            <button type="button" class="close-overlay btn btn-secondary ml-auto">Закрыть</button>
+        </div>
 
         <form action="{{ route('jira.createBugReport') }}" method="POST">
             @csrf
 
-            <!-- Скрытое поле для ключа Jira задачи -->
+            <!-- Скрытые поля -->
             <input type="hidden" id="issueKey" name="issue_key">
-
-            <!-- Скрытое поле для ключа заказчика -->
             <input type="hidden" id="customerKey" name="customer_key">
-
-            <!-- Скрытое поле для ключа исполнителя -->
             <input type="hidden" id="executorKey" name="executor_key">
+            <input type="hidden" id="errorTypeHidden" name="error_type">
 
-            <!-- Поле для устройства -->
-            <div class="form-group">
-                <label for="device">Устройство</label>
-                <input type="text" id="device" name="device" class="form-control" placeholder="Введите устройство" required>
-            </div>
-
-            <!-- Поле для заказчика (основной) -->
-            <div class="form-group">
-                <label for="customer">Заказчик (основной)</label>
-                <input type="text" id="customer" name="customer" class="form-control" placeholder="Введите имя заказчика" autocomplete="off">
-                <ul id="customer-list" class="list-group" style="display: none;"></ul>
-            </div>
-
-            <!-- Поле для исполнителя -->
-            <div class="form-group">
-                <label for="executor">Исполнитель</label>
-                <input type="text" id="executor" name="executor" class="form-control" placeholder="Введите имя исполнителя" autocomplete="off">
-                <ul id="executor-list" class="list-group" style="display: none;"></ul>
-            </div>
-
-            <!-- Поле для темы -->
-            <div class="form-group">
-                <label for="subject">Тема</label>
-                <input type="text" id="subject" name="subject" class="form-control" placeholder="Введите тему" required>
+            <!-- Платформа, Серьезность и Тема в одной строке -->
+            <div class="form-row d-flex justify-content-between mb-3">
+                <div class="form-group col-md-2 platform-group">
+                    <label for="platform">Платформа</label>
+                    <select id="platform" name="platform" class="form-control platform-select">
+                        <option value="AOS">AOS</option>
+                        <option value="IOS">IOS</option>
+                        <option value="Back">Back</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2 severity-group">
+                    <label for="severity">Серьезность</label>
+                    <select id="severity" name="severity" class="form-control severity-select">
+                        <option value="10200">S1</option>
+                        <option value="10201">S2</option>
+                        <option value="10202">S3</option>
+                        <option value="10203">S4</option>
+                        <option value="10204">S5</option>
+                        <option value="-1">Не выбрано</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-8 subject-group">
+                    <label for="subject">Тема</label>
+                    <input type="text" id="subject" name="subject" class="form-control" placeholder="Введите тему" required>
+                </div>
             </div>
 
             <!-- Поле для шагов -->
@@ -59,30 +65,118 @@
                 <textarea id="expected_result" name="expected_result" class="form-control" placeholder="Опишите ожидаемый результат" rows="3" required></textarea>
             </div>
 
-            <!-- Поле для выбора серьезности -->
+            <!-- Поле для устройства -->
             <div class="form-group">
-                <label for="severity">Серьезность</label>
-                <select id="severity" name="severity" class="form-control" required>
-                    <option value="">Выберите серьезность</option>
-                    <option value="10200">S1</option>
-                    <option value="10201">S2</option>
-                    <option value="10202">S3</option>
-                    <option value="10203">S4</option>
-                    <option value="10204">S5</option>
-                    <option value="-1">Не выбрано</option>
-                </select>
+                <label for="device">Устройство</label>
+                <input type="text" id="device" name="device" class="form-control" placeholder="Введите устройство" required>
+            </div>
+
+            <!-- Поле для исполнителя -->
+            <div class="form-group">
+                <label for="executor">Исполнитель</label>
+                <input type="text" id="executor" name="executor" class="form-control" placeholder="Введите имя исполнителя" autocomplete="off">
+                <ul id="executor-list" class="list-group" style="display: none;"></ul>
+            </div>
+
+            <!-- Поле для заказчика -->
+            <div class="form-group">
+                <label for="customer">Заказчик</label>
+                <input type="text" id="customer" name="customer" class="form-control" placeholder="Введите имя заказчика" autocomplete="off">
+                <ul id="customer-list" class="list-group" style="display: none;"></ul>
             </div>
 
             <!-- Кнопка для отправки формы -->
             <button type="submit" class="btn btn-primary">Отправить отчет</button>
-
-            <!-- Кнопка закрытия -->
-            <button type="button" class="close-overlay btn btn-secondary">Закрыть</button>
         </form>
     </div>
 </div>
 
+<style>
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
+.overlay-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transform: translate(450px, 50px); /* Смещение вправо и вниз */
+}
+
+.overlay-content h2 {
+    margin: 0 auto; /* Центрируем заголовок по горизонтали */
+    flex-grow: 1; /* Позволяем заголовку занимать доступное пространство */
+    text-align: center; /* Дополнительное выравнивание текста в центре */
+    margin-left: -150px; /* Подвиньте текст левее */
+     z-index: 1;
+}
+
+.close-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+     z-index: 999
+}
+
+.error-type-select {
+    width: 150px !important; /* Устанавливаем адекватную ширину для дропдауна */
+    flex-shrink: 0; /* Запрещаем сужение дропдауна при изменении размера */
+    z-index: 2;
+}
+
+.platform-select,
+.severity-select {
+    width: 1px; /* Уменьшенная ширина дропдаунов "Платформа" и "Серьезность" */
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.form-group {
+    margin-bottom: 1px;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+}
+
+.platform-group,
+.severity-group {
+    margin-right: 5px; /* Минимальный отступ между элементами */
+}
+.form-group.d-flex {
+    display: flex;
+    justify-content: space-between; /* Равномерно распределяем элементы по горизонтали */
+    align-items: center; /* Центрируем элементы по вертикали */
+}
+
+.subject-group {
+    flex-grow: 3;
+}
+</style>
 
 <script>
 $(document).ready(function() {
@@ -224,9 +318,19 @@ $(document).ready(function() {
         $('#executor-list').hide();
     });
 
+    // Обновление скрытого поля для типа ошибки при изменении значения в дропдауне
+        $('#errorType').on('change', function() {
+            $('#errorTypeHidden').val($(this).val());
+        });
+
     // Функция для закрытия оверлея
     $(document).on('click', '.close-overlay', function() {
         $('.overlay').hide();
+    });
+
+    // Открытие оверлея
+    $(document).on('click', '.open-overlay', function() {
+        $('.overlay').show();
     });
 });
 </script>
