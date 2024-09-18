@@ -1,11 +1,7 @@
 <!-- components/overlay.blade.php -->
 <div class="overlay" style="display: none;">
 @section('head')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
 @endsection
     <div class="overlay-content">
         <!-- Дропбокс с выбором типа ошибки (слева) -->
@@ -103,130 +99,6 @@
         </form>
     </div>
 </div>
-
-<style>
-/* Общие стили для оверлея */
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-/* Контент оверлея */
-.overlay-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 800px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    position: relative;
-    transform: translate(450px, 50px);
-}
-
-/* Заголовки */
-.overlay-content h2 {
-    text-align: left;
-    margin: 0;
-    font-size: 24px; /* Размер шрифта заголовка */
-    font-weight: 600; /* Толщина шрифта */
-    color: #007bff; /* Цвет заголовка */
-    margin-bottom: 20px; /* Отступ снизу */
-}
-
-/* Кнопка закрытия */
-.close-overlay {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #f44336;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    z-index: 999;
-    font-size: 16px; /* Размер шрифта */
-}
-
-/* Поля выбора */
-.error-type-select,
-.platform-select,
-.severity-select {
-    font-size: 14px; /* Размер шрифта */
-    font-family: 'Arial', sans-serif; /* Шрифт для полей выбора */
-}
-
-/* Строка формы */
-.form-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-}
-
-/* Группы формы */
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.platform-group,
-.severity-group {
-    flex: 0 1 auto;
-}
-
-.subject-group {
-    flex: 1;
-    margin-left: 5px;
-}
-
-/* Метки и поля ввода */
-.form-group label {
-    display: block;
-    text-align: left;
-    font-size: 16px; /* Размер шрифта меток */
-    font-weight: 500; /* Толщина шрифта */
-    color: #333; /* Цвет меток */
-    margin-bottom: 5px; /* Отступ снизу */
-}
-
-.form-control {
-    width: 100%;
-    margin-bottom: 0.5rem;
-    font-size: 14px; /* Размер шрифта полей ввода */
-    font-family: 'Arial', sans-serif; /* Шрифт для полей ввода */
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    padding: 0.375rem 0.75rem;
-}
-
-/* Поле для файлов */
-.form-control-file {
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    font-size: 14px; /* Размер шрифта для поля файлов */
-    font-family: 'Arial', sans-serif; /* Шрифт для поля файлов */
-}
-
-/* Кнопка отправки */
-.btn-primary {
-    font-size: 16px; /* Размер шрифта кнопки */
-    font-weight: 600; /* Толщина шрифта кнопки */
-    padding: 10px 20px; /* Отступы кнопки */
-    border-radius: 4px; /* Скругление углов кнопки */
-}
-
-
-</style>
-
 <script>
 $(document).ready(function() {
     let currentQueryCustomer = ''; // Хранение текущего запроса для заказчика
@@ -452,6 +324,171 @@ $(document).ready(function() {
         });
     });
 </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    let isSubmitting = false; // Флаг для отслеживания состояния отправки
+
+    $('#bugReportForm').off('submit').on('submit', function(event) {
+        event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+        if (isSubmitting) {
+            console.log('Отправка формы уже идет. Прекращаем дальнейшее выполнение.');
+            return; // Если уже идет отправка, выходим из функции
+        }
+
+        isSubmitting = true; // Устанавливаем флаг отправки в true
+        console.log('Начало отправки формы.');
+
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        // Пример AJAX запроса для отправки данных формы
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            data: formData,
+                dataType: 'json', // Добавьте это для явного указания ожидаемого типа данных
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                console.log('Перед отправкой запроса.');
+            },
+            success: function(response) {
+                console.log('Успешная отправка формы. Ответ от сервера:', response);
+                // Закрываем оверлей после успешной отправки
+                $('.overlay').hide();
+            },
+            error: function(xhr, status, error) {
+                console.log('Ошибка при отправке формы. Статус:', status, 'Ошибка:', error);
+            },
+            complete: function() {
+                isSubmitting = false; // Сбрасываем флаг отправки после завершения запроса
+            }
+        });
+    });
+});
+</script>
+<style>
+/* Общие стили для оверлея */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Контент оверлея */
+.overlay-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transform: translate(450px, 50px);
+}
+
+/* Заголовки */
+.overlay-content h2 {
+    text-align: left;
+    margin: 0;
+    font-size: 24px; /* Размер шрифта заголовка */
+    font-weight: 600; /* Толщина шрифта */
+    color: #007bff; /* Цвет заголовка */
+    margin-bottom: 20px; /* Отступ снизу */
+}
+
+/* Кнопка закрытия */
+.close-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    z-index: 999;
+    font-size: 16px; /* Размер шрифта */
+}
+
+/* Поля выбора */
+.error-type-select,
+.platform-select,
+.severity-select {
+    font-size: 14px; /* Размер шрифта */
+    font-family: 'Arial', sans-serif; /* Шрифт для полей выбора */
+}
+
+/* Строка формы */
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+/* Группы формы */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.platform-group,
+.severity-group {
+    flex: 0 1 auto;
+}
+
+.subject-group {
+    flex: 1;
+    margin-left: 5px;
+}
+
+/* Метки и поля ввода */
+.form-group label {
+    display: block;
+    text-align: left;
+    font-size: 16px; /* Размер шрифта меток */
+    font-weight: 500; /* Толщина шрифта */
+    color: #333; /* Цвет меток */
+    margin-bottom: 5px; /* Отступ снизу */
+}
+
+.form-control {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 14px; /* Размер шрифта полей ввода */
+    font-family: 'Arial', sans-serif; /* Шрифт для полей ввода */
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Поле для файлов */
+.form-control-file {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 14px; /* Размер шрифта для поля файлов */
+    font-family: 'Arial', sans-serif; /* Шрифт для поля файлов */
+}
+
+/* Кнопка отправки */
+.btn-primary {
+    font-size: 16px; /* Размер шрифта кнопки */
+    font-weight: 600; /* Толщина шрифта кнопки */
+    padding: 10px 20px; /* Отступы кнопки */
+    border-radius: 4px; /* Скругление углов кнопки */
+}
 
 
-
+</style>

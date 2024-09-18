@@ -164,8 +164,7 @@ public function createBugReport(Request $request)
     $password = auth()->user()->password;
 
     if (empty($email) || empty($password)) {
-        Log::error('JiraController: Missing Jira credentials.');
-        return back()->withErrors(['error' => 'Jira credentials are missing.']);
+        return response()->json(['error' => 'Jira credentials are missing.'], 400);
     }
 
     $credentials = base64_encode($email . ':' . $password);
@@ -175,16 +174,13 @@ public function createBugReport(Request $request)
     // Получаем данные о существующей задаче
     $issueUrl = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}";
 
-    Log::info('JiraController: Sending request to get existing issue data', ['url' => $issueUrl, 'headers' => $headers]);
-
     try {
         $issueResponse = Http::withHeaders($headers)
             ->accept('application/json')
             ->get($issueUrl);
 
         if (!$issueResponse->successful()) {
-            Log::error('JiraController: Failed to get existing issue data', ['status' => $issueResponse->status(), 'response_body' => $issueResponse->body()]);
-            return back()->withErrors(['error' => 'Error fetching existing issue data from Jira.']);
+            return response()->json(['error' => 'Error fetching existing issue data from Jira.'], 500);
         }
 
         $issueData = $issueResponse->json();
@@ -193,8 +189,7 @@ public function createBugReport(Request $request)
         $epicLink = $issueData['fields']['customfield_10000'] ?? null; // Получаем значение "Epic Link"
 
         if (!$projectKey) {
-            Log::error('JiraController: Project key not found in existing issue data.');
-            return back()->withErrors(['error' => 'Unable to retrieve project key from existing issue.']);
+            return response()->json(['error' => 'Unable to retrieve project key from existing issue.'], 400);
         }
 
         $customerKey = strtoupper($request->customer_key);
@@ -323,14 +318,12 @@ public function createBugReport(Request $request)
             // Обрабатываем вложенные файлы
             $this->handleAttachments($request->file('attachments'), $newIssueKey, $headers);
 
-            return back()->with('success', 'Задача успешно создана в Jira и связана с существующей задачей!');
+            return response()->json(['success' => 'Задача успешно создана в Jira и связана с существующей задачей!']);
         } else {
-            Log::error('JiraController: Failed to create issue in Jira.', ['response_body' => $createResponse->body()]);
-            return back()->withErrors(['error' => 'Error creating issue in Jira.']);
+            return response()->json(['error' => 'Error creating issue in Jira.'], 500);
         }
     } catch (\Exception $e) {
-        Log::error('JiraController: Exception occurred while creating issue', ['exception' => $e->getMessage()]);
-        return back()->withErrors(['error' => 'An unexpected error occurred while creating issue in Jira.']);
+        return response()->json(['error' => 'An unexpected error occurred while creating issue in Jira.'], 500);
     }
 }
 
