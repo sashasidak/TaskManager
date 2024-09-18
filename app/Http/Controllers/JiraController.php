@@ -226,7 +226,53 @@ public function createBugReport(Request $request)
         // Формируем summary
         $summary = "[{$platform}][{$severityLabel}] {$request->subject}";
 
-        // Создаем новую задачу
+        // Преобразование HTML в Markdown
+        function htmlToMarkdown($html) {
+            // Удаляем HTML-теги, кроме необходимых
+            $html = strip_tags($html, '<p><b><i><ul><ol><li><code>');
+
+            // Замена <p> на пустую строку
+            $html = preg_replace('/<p>/', "\n\n", $html);
+            $html = preg_replace('/<\/p>/', "\n\n", $html);
+
+            // Замена <b> на **
+            $html = preg_replace('/<b>/', '*', $html);
+            $html = preg_replace('/<\/b>/', '*', $html);
+
+            // Замена <i> на *
+            $html = preg_replace('/<i>/', '*', $html);
+            $html = preg_replace('/<\/i>/', '*', $html);
+
+            // Замена <ul> и <ol> на пустую строку
+            $html = preg_replace('/<ul>/', "\n", $html);
+            $html = preg_replace('/<\/ul>/', "\n", $html);
+            $html = preg_replace('/<ol>/', "\n", $html);
+            $html = preg_replace('/<\/ol>/', "\n", $html);
+
+            // Замена <li> на - для <ul> и 1. для <ol>
+            $html = preg_replace('/<li>/', '- ', $html);
+            $html = preg_replace('/<\/li>/', "\n", $html);
+            $html = preg_replace('/<ol>/', "\n", $html);
+            $html = preg_replace('/<\/ol>/', "\n", $html);
+
+            // Замена <ol><li> на нумерованный список
+            $html = preg_replace('/<ol>\s*<li>/', '1. ', $html);
+            $html = preg_replace('/<\/ol>\s*<\/li>/', "\n", $html);
+
+            // Замена <code> на ``
+            $html = preg_replace('/<code>/', '`', $html);
+            $html = preg_replace('/<\/code>/', '`', $html);
+
+            return trim($html);
+        }
+
+
+        $stepsMarkdown = htmlToMarkdown($request->steps);
+        $actualResultMarkdown = htmlToMarkdown($request->actual_result);
+        $expectedResultMarkdown = htmlToMarkdown($request->expected_result);
+
+        $descriptionMarkdown = "*Шаги:*\n" . $stepsMarkdown . "\n\n*Фактический результат:*\n" . $actualResultMarkdown . "\n\n*Ожидаемый результат:*\n" . $expectedResultMarkdown;
+
         $createUrl = "http://{$this->jiraDomain}/rest/api/2/issue";
         $createData = [
             'fields' => [
@@ -234,7 +280,7 @@ public function createBugReport(Request $request)
                     'key' => $projectKey
                 ],
                 'summary' => $summary, // Используем сформированный summary
-                'description' => "Шаги:\n" . $request->steps . "\n\nФактический результат:\n" . $request->actual_result . "\n\nОжидаемый результат:\n" . $request->expected_result,
+                'description' => $descriptionMarkdown, // Используем преобразованный Markdown
                 'issuetype' => [
                     'id' => $issueTypeId
                 ],

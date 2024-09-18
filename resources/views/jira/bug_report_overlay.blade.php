@@ -1,5 +1,9 @@
 <!-- components/overlay.blade.php -->
 <div class="overlay" style="display: none;">
+@section('head')
+    <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
+@endsection
     <div class="overlay-content">
         <!-- Дропбокс с выбором типа ошибки (слева) -->
         <div class="form-group d-flex justify-content-between align-items-center mb-4">
@@ -393,3 +397,40 @@ $(document).ready(function() {
             });
 });
 </script>
+<script>
+    $(document).ready(function() {
+        $('#steps, #actual_result, #expected_result').summernote({
+            minHeight: '50px',
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['font', ['strikethrough', 'superscript', 'subscript']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['height', ['height']]
+            ],
+            buttons: {
+                code: function(context) {
+                    var ui = $.summernote.ui;
+                    var button = ui.button({
+                        contents: '<i class="note-icon-code"/>',
+                        tooltip: 'Insert Code',
+                        click: function() {
+                            context.invoke('editor.formatBlock', 'pre');
+                        }
+                    });
+                    return button.render();
+                }
+            },
+            callbacks: {
+                onInit: function() {
+                    // Применяем стиль выравнивания по левому краю при инициализации
+                    $('.note-editable').css('text-align', 'left');
+                }
+            }
+        });
+    });
+</script>
+
+
+
