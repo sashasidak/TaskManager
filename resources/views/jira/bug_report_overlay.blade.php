@@ -21,12 +21,13 @@
             <input type="hidden" id="issueKey" name="issue_key">
             <input type="hidden" id="customerKey" name="customer_key">
             <input type="hidden" id="executorKey" name="executor_key">
-            <input type="file" name="attachments[]" multiple>
 
-             <select id="errorType" name="error_type" class="form-control error-type-select">
-                  <option value="bug_fix">Исправление ошибки</option>
-                  <option value="design_issue">Ошибка дизайна</option>
+            <!-- Поле для выбора типа ошибки -->
+            <select id="errorType" name="error_type" class="form-control error-type-select mb-3">
+                <option value="bug_fix">Исправление ошибки</option>
+                <option value="design_issue">Ошибка дизайна</option>
             </select>
+
             <!-- Платформа, Серьезность и Тема в одной строке -->
             <div class="form-row d-flex justify-content-between mb-3">
                 <div class="form-group col-md-2 platform-group">
@@ -92,6 +93,11 @@
                 <ul id="customer-list" class="list-group" style="display: none;"></ul>
             </div>
 
+            <!-- Поле для прикрепления файлов -->
+            <div class="form-group">
+                <input type="file" id="attachments" name="attachments[]" multiple class="form-control-file">
+            </div>
+
             <!-- Кнопка для отправки формы -->
             <button type="submit" class="btn btn-primary">Отправить отчет</button>
         </form>
@@ -99,6 +105,7 @@
 </div>
 
 <style>
+/* Общие стили для оверлея */
 .overlay {
     position: fixed;
     top: 0;
@@ -112,6 +119,7 @@
     z-index: 1000;
 }
 
+/* Контент оверлея */
 .overlay-content {
     background: #fff;
     padding: 20px;
@@ -125,14 +133,17 @@
     transform: translate(450px, 50px);
 }
 
+/* Заголовки */
 .overlay-content h2 {
-    margin: 0 auto;
-    flex-grow: 1;
-    text-align: center;
-    margin-left: -150px;
-    z-index: 1;
+    text-align: left;
+    margin: 0;
+    font-size: 24px; /* Размер шрифта заголовка */
+    font-weight: 600; /* Толщина шрифта */
+    color: #007bff; /* Цвет заголовка */
+    margin-bottom: 20px; /* Отступ снизу */
 }
 
+/* Кнопка закрытия */
 .close-overlay {
     position: absolute;
     top: 10px;
@@ -143,39 +154,76 @@
     padding: 5px 10px;
     border-radius: 4px;
     z-index: 999;
+    font-size: 16px; /* Размер шрифта */
 }
 
-.error-type-select {
-    width: 150px !important;
-    flex-shrink: 0;
-    z-index: 2;
-}
-
+/* Поля выбора */
+.error-type-select,
 .platform-select,
 .severity-select {
-    flex: 0 1 auto; /* Делаем так, чтобы элементы могли сжиматься, но не расширяться */
-    margin-right: 5px; /* Минимальный отступ между элементами */
+    font-size: 14px; /* Размер шрифта */
+    font-family: 'Arial', sans-serif; /* Шрифт для полей выбора */
 }
 
+/* Строка формы */
 .form-row {
     display: flex;
-    align-items: center; /* Центрируем элементы по вертикали */
-    gap: 0; /* Убираем промежутки между элементами */
+    align-items: center;
+    gap: 0;
 }
 
+/* Группы формы */
 .form-group {
-    margin-bottom: 0; /* Убираем нижние отступы у групп */
+    margin-bottom: 1rem;
 }
 
 .platform-group,
 .severity-group {
-    flex: 0 1 auto; /* Делаем элементы гибкими, чтобы занимали только необходимое пространство */
+    flex: 0 1 auto;
 }
 
 .subject-group {
-    flex: 1; /* Поле "Тема" будет занимать оставшееся пространство */
-    margin-left: 5px; /* Небольшой отступ слева для отделения от предыдущих элементов */
+    flex: 1;
+    margin-left: 5px;
 }
+
+/* Метки и поля ввода */
+.form-group label {
+    display: block;
+    text-align: left;
+    font-size: 16px; /* Размер шрифта меток */
+    font-weight: 500; /* Толщина шрифта */
+    color: #333; /* Цвет меток */
+    margin-bottom: 5px; /* Отступ снизу */
+}
+
+.form-control {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 14px; /* Размер шрифта полей ввода */
+    font-family: 'Arial', sans-serif; /* Шрифт для полей ввода */
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Поле для файлов */
+.form-control-file {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 14px; /* Размер шрифта для поля файлов */
+    font-family: 'Arial', sans-serif; /* Шрифт для поля файлов */
+}
+
+/* Кнопка отправки */
+.btn-primary {
+    font-size: 16px; /* Размер шрифта кнопки */
+    font-weight: 600; /* Толщина шрифта кнопки */
+    padding: 10px 20px; /* Отступы кнопки */
+    border-radius: 4px; /* Скругление углов кнопки */
+}
+
 
 </style>
 
@@ -185,11 +233,9 @@ $(document).ready(function() {
     let currentQueryExecutor = ''; // Хранение текущего запроса для исполнителя
     let currentRequestCustomer = null; // Хранение текущего запроса Ajax для заказчика
     let currentRequestExecutor = null; // Хранение текущего запроса Ajax для исполнителя
-
     // Загрузка данных из Local Storage
     function loadFormData() {
         const formData = JSON.parse(localStorage.getItem('overlayFormData')) || {};
-
         $('#platform').val(formData.platform || '');
         $('#severity').val(formData.severity || '');
         $('#subject').val(formData.subject || '');
@@ -200,16 +246,13 @@ $(document).ready(function() {
         $('#executor').val(formData.executor || '');
         $('#customer').val(formData.customer || '');
         $('#errorType').val(formData.error_type || '');
-
         if (formData.executorKey) {
             $('#executorKey').val(formData.executorKey);
         }
-
         if (formData.customerKey) {
             $('#customerKey').val(formData.customerKey);
         }
     }
-
     // Сохранение данных в Local Storage
     function saveFormData() {
         const formData = {
@@ -228,7 +271,6 @@ $(document).ready(function() {
         };
         localStorage.setItem('overlayFormData', JSON.stringify(formData));
     }
-
     // Функция для создания дебаунса
     function debounce(func, delay) {
         let timer;
@@ -239,42 +281,32 @@ $(document).ready(function() {
             }, delay);
         };
     }
-
     // Обработчик события изменения полей формы с сохранением в Local Storage
     const debouncedSave = debounce(saveFormData, 300);
     $('#platform, #severity, #subject, #steps, #actual_result, #expected_result, #device, #executor, #customer, #errorType').on('input change', debouncedSave);
-
     // Применение дебаунса для ввода в поле заказчика
     $('#customer').on('input', debounce(searchCustomer, 300));
-
     // Применение дебаунса для ввода в поле исполнителя
     $('#executor').on('input', debounce(searchExecutor, 300));
-
     // Загрузка данных при загрузке страницы
     loadFormData();
-
     // Функция для поиска заказчика
     function searchCustomer() {
         var query = $('#customer').val();
-
         // Не отправляем запрос, если длина запроса меньше 3 символов
         if (query.length < 3) {
             $('#customer-list').hide();
             return;
         }
-
         // Если запрос не изменился, не отправляем новый запрос
         if (query === currentQueryCustomer) {
             return;
         }
-
         currentQueryCustomer = query; // Обновляем текущий запрос
-
         // Если предыдущий запрос ещё выполняется, отменяем его
         if (currentRequestCustomer) {
             currentRequestCustomer.abort();
         }
-
         currentRequestCustomer = $.ajax({
             url: "{{ route('jira.searchCustomer') }}",
             method: 'GET',
@@ -301,29 +333,23 @@ $(document).ready(function() {
             }
         });
     }
-
     // Функция для поиска исполнителя
     function searchExecutor() {
         var query = $('#executor').val();
-
         // Не отправляем запрос, если длина запроса меньше 3 символов
         if (query.length < 3) {
             $('#executor-list').hide();
             return;
         }
-
         // Если запрос не изменился, не отправляем новый запрос
         if (query === currentQueryExecutor) {
             return;
         }
-
         currentQueryExecutor = query; // Обновляем текущий запрос
-
         // Если предыдущий запрос ещё выполняется, отменяем его
         if (currentRequestExecutor) {
             currentRequestExecutor.abort();
         }
-
         currentRequestExecutor = $.ajax({
             url: "{{ route('jira.searchExecutor') }}",
             method: 'GET',
@@ -350,13 +376,10 @@ $(document).ready(function() {
             }
         });
     }
-
     // Применение дебаунса для ввода в поле заказчика
     $('#customer').on('input', debounce(searchCustomer, 300));
-
     // Применение дебаунса для ввода в поле исполнителя
     $('#executor').on('input', debounce(searchExecutor, 300));
-
     // Функция для выбора заказчика из списка
     $(document).on('click', '#customer-list li', function() {
         var selectedCustomer = $(this).text();
@@ -365,7 +388,6 @@ $(document).ready(function() {
         $('#customerKey').val(customerKey); // Сохраняем ключ в скрытое поле
         $('#customer-list').hide();
     });
-
     // Функция для выбора исполнителя из списка
     $(document).on('click', '#executor-list li', function() {
         var selectedExecutor = $(this).text();
@@ -374,22 +396,18 @@ $(document).ready(function() {
         $('#executorKey').val(executorKey); // Сохраняем ключ в скрытое поле
         $('#executor-list').hide();
     });
-
     // Обновление скрытого поля для типа ошибки при изменении значения в дропдауне
         $('#errorType').on('change', function() {
             $('#errorTypeHidden').val($(this).val());
         });
-
     // Функция для закрытия оверлея
     $(document).on('click', '.close-overlay', function() {
         $('.overlay').hide();
     });
-
     // Открытие оверлея
     $(document).on('click', '.open-overlay', function() {
         $('.overlay').show();
     });
-
     // Отображение выбранных файлов
             $('#files').on('change', function() {
                 const files = $(this)[0].files;
@@ -398,36 +416,6 @@ $(document).ready(function() {
                     alert('Вы выбрали файлы: ' + fileNames);
                 }
             });
-});
-</script>
-<script>
-$(document).ready(function() {
-    // Обработчик отправки формы
-    $('form').on('submit', function(event) {
-        event.preventDefault(); // Предотвращаем стандартное поведение формы
-
-        var form = $(this);
-        var formData = new FormData(form[0]);
-
-        // Пример AJAX запроса для отправки данных формы
-        $.ajax({
-            url: form.attr('action'),
-            method: form.attr('method'),
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                // Закрываем оверлей после успешной отправки
-                $('.overlay').hide();
-                // Показываем тост об успешной отправке
-                toastr.success('Отчет успешно отправлен!');
-            },
-            error: function() {
-                // Показываем тост об ошибке
-                toastr.error('Ошибка при отправке отчета.');
-            }
-        });
-    });
 });
 </script>
 <script>
