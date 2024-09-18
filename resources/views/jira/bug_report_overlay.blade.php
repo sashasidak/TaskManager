@@ -1,6 +1,9 @@
 <!-- components/overlay.blade.php -->
 <div class="overlay" style="display: none;">
 @section('head')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
     <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
 @endsection
@@ -11,7 +14,7 @@
             <button type="button" class="close-overlay btn btn-secondary ml-auto">Закрыть</button>
         </div>
 
-        <form action="{{ route('jira.createBugReport') }}" method="POST" enctype="multipart/form-data">
+        <form id="bugReportForm" action="{{ route('jira.createBugReport') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Скрытые поля -->
@@ -395,6 +398,36 @@ $(document).ready(function() {
                     alert('Вы выбрали файлы: ' + fileNames);
                 }
             });
+});
+</script>
+<script>
+$(document).ready(function() {
+    // Обработчик отправки формы
+    $('form').on('submit', function(event) {
+        event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        // Пример AJAX запроса для отправки данных формы
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // Закрываем оверлей после успешной отправки
+                $('.overlay').hide();
+                // Показываем тост об успешной отправке
+                toastr.success('Отчет успешно отправлен!');
+            },
+            error: function() {
+                // Показываем тост об ошибке
+                toastr.error('Ошибка при отправке отчета.');
+            }
+        });
+    });
 });
 </script>
 <script>
