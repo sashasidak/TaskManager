@@ -22,6 +22,7 @@
             <select id="errorType" name="error_type" class="form-control error-type-select mb-3">
                 <option value="bug_fix">Исправление ошибки</option>
                 <option value="design_issue">Ошибка дизайна</option>
+                <option value="bug">Ошибка</option>
             </select>
 
             <!-- Платформа, Серьезность и Тема в одной строке -->
@@ -295,12 +296,8 @@ $(document).ready(function() {
         $('#steps, #actual_result, #expected_result').summernote({
             minHeight: '50px',
             toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'clear']],
-                ['font', ['strikethrough', 'superscript', 'subscript']],
-                ['fontsize', ['fontsize']],
-                ['color', ['color']],
-                ['para', ['ul', 'ol', 'paragraph']],
-                ['height', ['height']]
+                ['style', ['bold']],
+                ['para', ['ul', 'ol', 'paragraph']]
             ],
             buttons: {
                 code: function(context) {

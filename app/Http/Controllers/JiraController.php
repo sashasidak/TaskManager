@@ -6,6 +6,8 @@ use App\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+
 
 class JiraController extends Controller
 {
@@ -175,6 +177,7 @@ public function createBugReport(Request $request)
     $issueUrl = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}";
 
     try {
+        // Получаем информацию о существующей задаче
         $issueResponse = Http::withHeaders($headers)
             ->accept('application/json')
             ->get($issueUrl);
@@ -192,10 +195,31 @@ public function createBugReport(Request $request)
             return response()->json(['error' => 'Unable to retrieve project key from existing issue.'], 400);
         }
 
+        // Получаем значение platform из запроса
+        $platform = strtoupper($request->platform);
+
+        // Устанавливаем компонент в зависимости от платформы
+        $componentId = null;
+        switch ($platform) {
+            case 'IOS':
+                $componentId = '10499';
+                break;
+            case 'AOS':
+                $componentId = '10500';
+                break;
+            case 'BACK':
+                $componentId = '12812';
+                break;
+        }
+
+        // Проверяем, был ли найден компонент
+        if ($componentId === null) {
+            return response()->json(['error' => 'Invalid platform specified.'], 400);
+        }
+
         $customerKey = strtoupper($request->customer_key);
         $executorKey = strtoupper($request->executor_key);
         $severity = $request->severity;
-        $platform = strtoupper($request->platform);
         $errorType = $request->error_type;
         $issueTypeId = '';
 
@@ -203,6 +227,8 @@ public function createBugReport(Request $request)
             $issueTypeId = '10803';
         } elseif ($errorType === 'design_issue') {
             $issueTypeId = '11700';
+        } elseif ($errorType === 'bug') {
+            $issueTypeId = '10102'; // Проверка для "bug"
         }
 
         // Определение серьезности (severity) для вставки в summary
@@ -286,8 +312,6 @@ public function createBugReport(Request $request)
                 'assignee' => [
                     'name' => $executorKey // Передаем ключ исполнителя в верхнем регистре
                 ],
-                // Добавляем устройство как customfield_11023
-                'customfield_11023' => $request->device, // Передаем значение устройства из формы
                 // Передаем значения "Исправить в версиях"
                 'fixVersions' => array_map(function($version) {
                     return ['id' => $version['id']];
@@ -298,8 +322,34 @@ public function createBugReport(Request $request)
                 'customfield_10300' => [
                     'id' => $severity // Передаем ID серьезности
                 ],
+                // Передаем customfield_11023 или environment в зависимости от issueTypeId
+                $issueTypeId === '10102' ? 'environment' : 'customfield_11023' => $issueTypeId === '10102' ? $request->device : $request->device
             ]
         ];
+
+        // Устанавливаем компонент для всех типов задач
+        $createData['fields']['components'] = [
+            ['id' => $componentId]
+        ];
+
+        // Если issueTypeId == '10102', добавляем дополнительные поля
+        if ($issueTypeId === '10102') {
+            $today = Carbon::today()->format('Y-m-d');  // Пример: 2024-09-19
+            $nextWeek = Carbon::today()->addDays(7)->format('Y-m-d');  // Пример: 2024-09-26
+
+            // Не передаем customfield_10000
+            unset($createData['fields']['customfield_10000']);
+
+            $createData['fields']['customfield_10201'] = $today;
+            $createData['fields']['customfield_10202'] = $nextWeek;
+
+            $createData['fields']['timetracking'] = [
+                'originalEstimate' => '1w',
+                'remainingEstimate' => '1w'
+            ];
+
+            $createData['fields']['labels'] = ['IT'];
+        }
 
         Log::info('JiraController: Sending create issue request', ['url' => $createUrl, 'headers' => $headers, 'data' => $createData]);
 
@@ -310,12 +360,9 @@ public function createBugReport(Request $request)
         Log::info('JiraController: Received response from Jira', ['status' => $createResponse->status(), 'response_body' => $createResponse->body()]);
 
         if ($createResponse->status() == 201) {
-            $newIssueKey = $createResponse->json()['key']; // Получаем ключ новой задачи
+            $newIssueKey = $createResponse->json()['key'];
 
-            // Устанавливаем связь между задачами
-            $this->linkIssues($issueKey, $newIssueKey, $headers);
-
-            // Обрабатываем вложенные файлы
+            $this->linkIssues($issueKey, $newIssueKey, $headers, $errorType);
             $this->handleAttachments($request->file('attachments'), $newIssueKey, $headers);
 
             return response()->json(['success' => 'Задача успешно создана в Jira и связана с существующей задачей!']);
@@ -323,6 +370,7 @@ public function createBugReport(Request $request)
             return response()->json(['error' => 'Error creating issue in Jira.'], 500);
         }
     } catch (\Exception $e) {
+        Log::error('Exception while creating issue in Jira:', ['exception' => $e->getMessage()]);
         return response()->json(['error' => 'An unexpected error occurred while creating issue in Jira.'], 500);
     }
 }
@@ -354,13 +402,16 @@ private function handleAttachments($files, $issueKey, $headers)
 
 
 
-private function linkIssues($sourceIssueKey, $targetIssueKey, $headers)
+private function linkIssues($sourceIssueKey, $targetIssueKey, $headers, $errorType)
 {
     $url = "http://{$this->jiraDomain}/rest/api/2/issueLink";
 
+    // Определяем тип связи в зависимости от типа ошибки
+    $linkTypeId = ($errorType === 'bug') ? '10305' : '10401';
+
     $data = [
         'type' => [
-            'id' => '10401' // Используем ID типа связи
+            'id' => $linkTypeId
         ],
         'inwardIssue' => [
             'key' => $sourceIssueKey
@@ -370,17 +421,12 @@ private function linkIssues($sourceIssueKey, $targetIssueKey, $headers)
         ]
     ];
 
-    Log::info('JiraController: Sending request to link issues', ['url' => $url, 'headers' => $headers, 'data' => $data]);
-
     try {
         $response = Http::withHeaders($headers)
             ->accept('application/json')
             ->post($url, $data);
 
-        Log::info('JiraController: Received response from Jira', ['status' => $response->status(), 'response_body' => $response->body()]);
-
         if ($response->status() == 201) {
-            Log::info('JiraController: Issues successfully linked.');
         } else {
             Log::error('JiraController: Failed to link issues.', ['response_body' => $response->body()]);
         }
