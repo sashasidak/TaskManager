@@ -65,7 +65,6 @@ class JiraController extends Controller
 
             if ($response->successful()) {
                 $issues = $response->json()['issues'];
-                Log::info('Jira Dashboard: Issues retrieved successfully.', ['issues_count' => count($issues)]);
                 return view('jira.dashboard', compact('issues', 'project'));
             } else {
                 Log::error('Jira Dashboard: Failed to fetch issues.', ['response_body' => $response->body()]);
@@ -99,7 +98,6 @@ public function getIssueEstimate($issueKey)
     $headers = ['Authorization' => 'Basic ' . $credentials];
     $url = "http://{$this->jiraDomain}/rest/api/2/issue/{$issueKey}";
 
-
     try {
         $response = Http::withHeaders($headers)
             ->accept('application/json')
@@ -114,16 +112,35 @@ public function getIssueEstimate($issueKey)
             $timeSpent = $this->formatEstimate($timeSpentInSeconds);
             $originalEstimate = $this->formatEstimate($originalEstimateInSeconds);
 
+            // Получаем подзадачи
+            $issueLinks = $issueData['fields']['issuelinks'] ?? []; // Получаем связи с задачами
+
+            $subtaskList = [];
+
+
+            // Обрабатываем связанные задачи
+            foreach ($issueLinks as $link) {
+                if (isset($link['outwardIssue'])) {
+                    $outwardIssue = $link['outwardIssue'];
+                    $subtaskList[] = [
+                        'key' => $outwardIssue['key'],
+                        'summary' => $outwardIssue['fields']['summary'],
+                        'status' => $outwardIssue['fields']['status']['name'] ?? 'Unknown'
+                    ];
+                }
+            }
             return [
                 'status' => 200,
                 'time_spent' => $timeSpent,
-                'original_estimate' => $originalEstimate
+                'original_estimate' => $originalEstimate,
+                'subtasks' => $subtaskList // Добавляем список подзадач
             ];
         }
 
+        Log::warning('JiraController: Error fetching issue data', ['issueKey' => $issueKey, 'status' => $response->status()]);
         return ['status' => $response->status(), 'error' => 'Error fetching issue data from Jira'];
     } catch (\Exception $e) {
-        Log::error('JiraController: Exception occurred while fetching issue data', ['exception' => $e->getMessage()]);
+        Log::error('JiraController: Exception occurred while fetching issue data', ['issueKey' => $issueKey, 'exception' => $e->getMessage()]);
         return ['status' => 500, 'error' => 'An unexpected error occurred while fetching data from Jira.'];
     }
 }
@@ -351,13 +368,9 @@ public function createBugReport(Request $request)
             $createData['fields']['labels'] = ['IT'];
         }
 
-        Log::info('JiraController: Sending create issue request', ['url' => $createUrl, 'headers' => $headers, 'data' => $createData]);
-
         $createResponse = Http::withHeaders($headers)
             ->accept('application/json')
             ->post($createUrl, $createData);
-
-        Log::info('JiraController: Received response from Jira', ['status' => $createResponse->status(), 'response_body' => $createResponse->body()]);
 
         if ($createResponse->status() == 201) {
             $newIssueKey = $createResponse->json()['key'];
@@ -388,8 +401,6 @@ private function handleAttachments($files, $issueKey, $headers)
             $response = Http::withHeaders(array_merge($headers, ['X-Atlassian-Token' => 'no-check']))
                 ->attach('file', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                 ->post($url);
-
-            Log::info('JiraController: Received response from Jira (attachment)', ['status' => $response->status(), 'response_body' => $response->body()]);
 
             if (!$response->successful()) {
                 Log::error('JiraController: Failed to attach file.', ['response_body' => $response->body()]);
@@ -458,7 +469,6 @@ public function searchCustomer(Request $request)
             ->get($url);
 
         // Логирование тела ответа
-        Log::info('JiraController: Response from Jira (searchCustomer)', [
             'status' => $response->status(),
             'response_body' => $response->body()
         ]);
@@ -500,7 +510,6 @@ public function searchExecutor(Request $request)
             ->accept('application/json')
             ->get($url);
 
-        Log::info('JiraController: Response from Jira (searchExecutor)', [
             'status' => $response->status(),
             'response_body' => $response->body()
         ]);
