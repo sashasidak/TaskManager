@@ -468,10 +468,6 @@ public function searchCustomer(Request $request)
             ->accept('application/json')
             ->get($url);
 
-        // Логирование тела ответа
-            'status' => $response->status(),
-            'response_body' => $response->body()
-        ]);
 
         if (!$response->successful()) {
             Log::error('JiraController: Failed to search for customers.', ['status' => $response->status(), 'response_body' => $response->body()]);
@@ -510,9 +506,6 @@ public function searchExecutor(Request $request)
             ->accept('application/json')
             ->get($url);
 
-            'status' => $response->status(),
-            'response_body' => $response->body()
-        ]);
 
         if (!$response->successful()) {
             Log::error('JiraController: Failed to search for executors.', ['status' => $response->status(), 'response_body' => $response->body()]);

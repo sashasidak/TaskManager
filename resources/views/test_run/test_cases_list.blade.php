@@ -336,13 +336,7 @@
                                      subtaskList.style.display = 'none'; // Сворачиваем список
                                  }
                              });
-                         } else {
-                             subtaskListBox.textContent = 'No subtasks available.';
-                         }
-
-
-
-
+                         } else {}
                          element.appendChild(subtaskListBox);
                      } else {
                          console.error(`Error fetching estimate: ${data.error}`);

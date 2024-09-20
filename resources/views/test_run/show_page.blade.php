@@ -164,6 +164,10 @@
                 var description = @json($testPlanDescription);
 
                 function extractIssueKey(description) {
+                    // Проверка на null или undefined
+                    if (!description) {
+                        return null; // Если description пустой, возвращаем null
+                    }
                     // Регулярное выражение для извлечения ключа задачи
                     var regex = /http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/;
                     var match = description.match(regex);
