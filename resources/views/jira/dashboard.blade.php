@@ -17,7 +17,7 @@
             <!-- Dropdown для версий -->
             <div class="me-2">
                 <select class="form-select" id="versionFilter" style="height: 50px; font-size: 1.2rem;">
-                    <option value="">Все версии</option>
+                    <option value="">---</option>
                     @php
                         $versions = [];
 

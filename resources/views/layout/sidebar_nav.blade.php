@@ -65,7 +65,7 @@
         <hr>
 
         <div class="text-center text-white mt-4">
-            <small>Version 3.16.4</small>
+            <small>Version 3.16.5</small>
         </div>
 
     </div>
