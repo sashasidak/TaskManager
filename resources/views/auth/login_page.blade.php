@@ -38,7 +38,7 @@
                             @csrf
 
                             <div class="form-group mb-3">
-                                <input type="text" placeholder="Email" id="email" class="form-control" name="email" required
+                                <input type="text" placeholder="Login" id="email" class="form-control" name="email" required
                                        autofocus>
                             </div>
 
@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="text-center mt-5 text-muted">
-                   ABankTMS
+                   àbank24TMS
                 </div>
             </div>
         </div>

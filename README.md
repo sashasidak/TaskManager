@@ -1,6 +1,7 @@
-# ABankTMS - Open Source Test Management System
+# TMS - Test Management System
 
-**ABankTMS** is open source test management software for managing test suites, test cases, test plans, test runs and documentation.
+**àbank24TMS** is test management software for managing test suites, test cases, test plans, test runs and documentation.
+(Powered by QaraTMS https://github.com/a13xh7/QaraTMS)
 
 
 ## Languages and Tools:
@@ -12,7 +13,31 @@
 <a href="https://jquery.com/" title="jQuery"><img src="https://github.com/get-icon/geticon/raw/master/icons/jquery-icon.svg" alt="jQuery" width="60px" height="60px"></a>
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" title="JavaScript"><img src="https://github.com/get-icon/geticon/raw/master/icons/javascript.svg" alt="JavaScript" width="60px" height="60px"></a>
 
-## Getting Started
+## Getting Started with docker-compose (quick start)
+
+* Установить docker и docker-compose
+* Устновить PHP brew install php или sudo apt install php
+* Стянуть git clone (с ссылкой на репозиторий)
+* Дать права sudo chmod +x docker-run.sh
+* Создать директории:
+mkdir -p /Users/admin/docker_data/quara/db    
+mkdir -p /Users/admin/docker_data/quara/app    
+mkdir -p /Users/admin/docker_data/quara/mysql
+* Дать права (путь исправить на свой)
+sudo chown -R $(whoami):$(whoami) /Users/admin/docker_data/quara/ 
+* Запустить ./docker-run.sh с терминала
+* Проверить что все контейнеры поднялись
+* Проверить подключение по http://localhost:8075/
+
+
+Вроде бы как все….
+
+
+Резервная копия: docker exec -i mysqldb mysqldump -u root -proot qara > ~/Desktop/backup.sql
+Восстановить: cat ~/Desktop/backup.sql | docker exec -i mysqldb mysql -u root -proot qara
+
+
+## Getting Started with Artisan
 
 - You will need to install **php ^8.0.2**, **mysql-8** or **SQLite**, **composer**.
 - Pull the project from git repository.
@@ -34,8 +59,6 @@ If you are using SQLite:
 
 
 ## How to use it
-![logo](public/img/header.jpg)
-
 1. Create Project.
 
 ![logo](public/img/5.png)
@@ -49,7 +72,7 @@ If you are using SQLite:
 
 ![logo](public/img/2.png)
 
-4. Create test plan, select cases you need to test. 
+4. Create test plan, from "TestRun" page 
 
 ![logo](public/img/3.png)
 
@@ -63,7 +86,7 @@ If you are using SQLite:
 
 ## Contributing
 
-Please contribute using [GitHub Flow](https://guides.github.com/introduction/flow). Create a branch, add commits, and [open a pull request](https://github.com/rahuldkjain/github-profile-readme-generator/compare).
+Please contribute using [GitHub Flow](https://guides.github.com/introduction/flow). Create a branch, add commits, and do a pull request.
 
 
 ## License

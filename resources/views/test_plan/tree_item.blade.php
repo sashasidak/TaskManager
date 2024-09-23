@@ -9,7 +9,7 @@
 
         <div>
             <i class="bi bi-folder2 fs-4"></i>
-            <span><b class="suiteTitle">{{$testSuite->title}}</b></span>
+            <span><b class="suiteTitle" data-title="{{$testSuite->title}}">{{$testSuite->title}}</b></span>
         </div>
     </div>
 
@@ -42,3 +42,22 @@
 
 </div>
 
+<script>
+function shortenUrls(text) {
+    const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
+    return text.replace(urlPattern, (match, fullUrl, protocol, shortUrl) => {
+        const shortenedText = shortUrl; // Например, A24MOB-33433
+        return `<a href="${fullUrl}" class="branch-link" target="_blank">${shortenedText}</a>`;
+    });
+}
+
+function updateSuiteTitles() {
+    document.querySelectorAll('.suiteTitle').forEach(span => {
+        const originalTitle = span.getAttribute('data-title');
+        span.innerHTML = shortenUrls(originalTitle);
+    });
+}
+
+// Вызывайте эту функцию, чтобы обновить ссылки после загрузки страницы
+document.addEventListener('DOMContentLoaded', updateSuiteTitles);
+</script>

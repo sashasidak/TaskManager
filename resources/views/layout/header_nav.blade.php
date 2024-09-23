@@ -2,10 +2,10 @@
 
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
-            <img src="{{asset('img/icon_at_6.png')}}" alt="" width="35px">
+            <img src="{{asset('img/favicon.ico')}}" alt="" width="35px">
         </a>
         <a class="navbar-brand link-light" href="/">
-            ABank-TMS
+            àbank24-TMS
         </a>
 
         <div class="collapse navbar-collapse">
@@ -25,9 +25,9 @@
                         Repositories
                     </a>
 
-                    <a href="{{route("test_plan_list_page", $project->id)}}" class="nav-link text-white">
+                   {{--  <a href="{{route("test_plan_list_page", $project->id)}}" class="nav-link text-white">
                         <i class="bi bi-journals"></i> Test Plans
-                    </a>
+                    </a> скрыл с бокового бара когда переделал содание test_run, убрав шаги с созданием Test_plan--}}
 
                     <a href="{{route("test_run_list_page", $project->id)}}" class="nav-link text-white">
                         <i class="bi bi-play-circle"></i> Test Runs
