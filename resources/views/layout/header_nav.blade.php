@@ -2,10 +2,10 @@
 
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
-            <img src="{{asset('img/icon_at_6.png')}}" alt="" width="35px">
+            <img src="{{asset('img/favicon.ico')}}" alt="" width="35px">
         </a>
         <a class="navbar-brand link-light" href="/">
-            ABank-TMS
+            àbank24-TMS
         </a>
 
         <div class="collapse navbar-collapse">

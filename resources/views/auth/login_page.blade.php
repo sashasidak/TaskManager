@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="text-center mt-5 text-muted">
-                   ABankTMS
+                   àbank24TMS
                 </div>
             </div>
         </div>
