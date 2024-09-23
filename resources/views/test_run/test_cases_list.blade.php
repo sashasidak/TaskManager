@@ -18,6 +18,14 @@
             </span>
             <span class="suite_title" data-title="{{$testSuite->title}}" style="padding-right: 70px;">{{$testSuite->title}}</span>
 
+         {{-- Bugreport Button (appears if Jira link is present) --}}
+         <button class="bugreport-button" style="position: absolute; right: 90px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
+             <i class="bi bi-bug"></i>
+         </button>
+
+         {{-- Подключаем overlay --}}
+         @include('jira.bug_report_overlay')
+
             {{-- PDF Report Button (only for top-level suites) --}}
             @if($testSuite->parent_id === null)  <!-- Adjust condition based on your logic -->
             <button class="pdf-button" onclick="generatePdfReport({{$project->id}}, {{$testRun->id}}, {{$testSuite->id}})" style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer;">
@@ -181,7 +189,49 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', updateSuiteTitles);
+    function checkForJiraLinks() {
+        // Сначала скрываем все кнопки багрепорта
+        document.querySelectorAll('.bugreport-button').forEach(function(button) {
+            button.style.display = 'none';
+        });
+
+        // Проверяем каждый элемент с классом '.suite_title'
+        document.querySelectorAll('.suite_title').forEach(function(element) {
+            let title = element.getAttribute('data-title');
+            if (title && title.includes('jira.ab.loc')) {
+                // Ищем ближайший элемент с классом '.suite_header'
+                let suiteHeader = element.closest('.suite_header');
+                if (suiteHeader) {
+                    let bugReportButton = suiteHeader.querySelector('.bugreport-button');
+
+                    // Если кнопка найдена, показываем ее
+                    if (bugReportButton) {
+                        bugReportButton.style.display = 'block';
+
+                        // Ищем ключ задачи в ссылке
+                        let jiraIssueKeyMatch = title.match(/http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/);
+                        if (jiraIssueKeyMatch) {
+                            let issueKey = jiraIssueKeyMatch[1];
+
+                            // Добавляем обработчик клика для кнопки багрепорта
+                            bugReportButton.addEventListener('click', function() {
+                                let issueKeyInput = document.querySelector('#issueKey');
+                                issueKeyInput.value = issueKey;
+
+                                // Открываем оверлей с формой багрепорта
+                                document.querySelector('.overlay').style.display = 'block';
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSuiteTitles();
+        checkForJiraLinks();
+    });
 </script>
 <script>
             $( document ).ready(function() {
@@ -192,15 +242,134 @@
 
             });
     </script>
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+     document.querySelectorAll('.suite_title').forEach(function(element) {
+         let title = element.getAttribute('data-title');
+         let jiraIssueKeyMatch = title.match(/http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/);
 
+         if (jiraIssueKeyMatch) {
+             let issueKey = jiraIssueKeyMatch[1];
+             fetch(`/jira/issue-estimate/${issueKey}`)
+                 .then(response => response.json())
+                 .then(data => {
+                     if (data.status === 200) {
+                         let timeSpent = data.time_spent;
+                         let originalEstimate = data.original_estimate;
+
+                         // Создаем estimate-box
+                         let estimateBox = document.createElement('div');
+                         estimateBox.className = 'estimate-box';
+                         estimateBox.textContent = `${timeSpent}/${originalEstimate}`;
+                         element.appendChild(estimateBox);
+
+                         // Создаем subtaskList-box
+                         let subtaskListBox = document.createElement('div');
+                         subtaskListBox.className = 'subtaskList-box';
+
+                         // Создаем элемент для заголовка (полоски)
+                         let toggleHeader = document.createElement('div');
+                         toggleHeader.style.cursor = 'pointer'; // Курсор в виде руки
+                         toggleHeader.style.backgroundColor = '#007bff'; // Цвет фона
+                         toggleHeader.style.height = '5px'; // Высота полоски
+                         toggleHeader.style.borderRadius = '2px'; // Скругление углов
+
+                         // Создаем элемент списка подзадач, если они есть
+                         if (data.subtasks.length > 0) {
+                             let subtaskList = document.createElement('ul');
+                             subtaskList.style.display = 'none'; // Изначально скрываем список
+                             subtaskList.style.flexWrap = 'wrap'; // Разрешаем перенос на новую строку
+                             subtaskList.style.listStyleType = 'none'; // Убираем маркеры списка
+                             subtaskList.style.padding = '0'; // Убираем отступы
+                             subtaskList.style.margin = '0'; // Убираем поля
+
+
+                             data.subtasks.forEach(subtask => {
+                                 let listItem = document.createElement('li');
+                                 listItem.style.marginRight = '10px'; // Отступ между элементами
+
+                                 // Создаем элемент для ссылки
+                                 let keyElement = document.createElement('a');
+                                 let keyId = subtask.key.split('-').pop(); // Оставляем только часть после дефиса
+                                 keyElement.textContent = keyId; // Устанавливаем отображаемый текст
+                                 keyElement.href = `http://jira.ab.loc/browse/${subtask.key}`; // Устанавливаем ссылку
+                                 keyElement.style.fontSize = '0.8em'; // Уменьшаем размер шрифта
+                                 keyElement.style.textDecoration = 'none'; // Убираем подчеркивание
+                                 keyElement.style.color = 'blue'; // Задаем цвет ссылки
+                                 keyElement.target = '_blank'; // Открывать в новой вкладке
+
+                                 // Создаем элемент для статуса
+                                 let statusDot = document.createElement('span');
+                                 statusDot.style.display = 'inline-block';
+                                 statusDot.style.width = '10px';
+                                 statusDot.style.height = '10px';
+                                 statusDot.style.borderRadius = '50%'; // Делает точку круглой
+                                 statusDot.style.marginLeft = '5px';
+
+                                 // Устанавливаем цвет точки в зависимости от статуса
+                                 switch (subtask.status) {
+                                     case 'WAIT:Test':
+                                         statusDot.style.backgroundColor = 'blue'; // Синяя точка
+                                         break;
+                                     case 'PROCESS:TEST':
+                                         statusDot.style.backgroundColor = 'green'; // Зеленая точка
+                                         break;
+                                     default:
+                                         statusDot.style.backgroundColor = 'gray'; // Серая точка
+                                         break;
+                                 }
+
+                                 // Добавляем элементы в listItem
+                                 listItem.appendChild(keyElement);
+                                 listItem.appendChild(statusDot);
+                                 subtaskList.appendChild(listItem);
+                             });
+
+                             subtaskListBox.appendChild(toggleHeader);
+                             subtaskListBox.appendChild(subtaskList);
+
+                             // Обработчик события для сворачивания/разворачивания
+                             toggleHeader.addEventListener('click', () => {
+                                 if (subtaskList.style.display === 'none') {
+                                     subtaskList.style.display = 'flex'; // Разворачиваем список
+                                 } else {
+                                     subtaskList.style.display = 'none'; // Сворачиваем список
+                                 }
+                             });
+                         } else {}
+                         element.appendChild(subtaskListBox);
+                     } else {
+                         console.error(`Error fetching estimate: ${data.error}`);
+                     }
+                 })
+                 .catch(error => console.error('Fetch error:', error));
+         }
+     });
+ });
+ // Находим элементы
+     const bugReportButton = document.querySelector('.bugreport-button');
+     const overlay = document.querySelector('.overlay');
+     const closeOverlayButton = document.querySelector('.close-overlay');
+
+     // Показать overlay при нажатии на кнопку
+     bugReportButton.addEventListener('click', () => {
+         overlay.style.display = 'flex';
+     });
+
+     // Скрыть overlay при нажатии на кнопку закрытия
+     closeOverlayButton.addEventListener('click', () => {
+         overlay.style.display = 'none';
+     });
+</script>
 <style>
-    .toggle-button i, .pdf-button i {
+    .toggle-button i, .pdf-button i, .bugreport-button i {
         font-size: 16px;
         color: darkgray;
     }
 
     .suite_header {
-        padding-right: 80px; /* Добавляем пространство справа для кнопок */
+        padding-right: 50px; /* Добавляем пространство справа для кнопок */
+        display: flex;
     }
 
     .pdf-button {
@@ -217,4 +386,58 @@
     .toggle-button {
         right: 10px; /* Положение кнопки Collapse/Expand */
     }
+    .subtaskList-box {
+        margin-top: 10px;
+        padding: 5px;
+        background-color: #f8f9fa; /* Светлый фон */
+        border: 1px solid lightgray;
+        border-radius: 4px;
+    }
+    .subtaskList-box ul {
+        list-style-type: none; /* Убираем маркеры списка */
+        padding-left: 0; /* Убираем отступ */
+    }
+    .subtaskList-box li {
+        margin: 2px 0; /* Отступ между элементами списка */
+    }
+    .subtaskList-box div {
+        margin-bottom: 0; /* Убираем отступ между полоской и списком */
+    }
+    .estimate-box {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #e0f7fa; /* Светло-синий фон */
+            color: #00796b; /* Тёмно-зелёный цвет текста */
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        /* Стили для overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .overlay-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .close-overlay {
+            background: none;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
 </style>

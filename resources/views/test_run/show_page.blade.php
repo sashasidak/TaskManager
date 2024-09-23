@@ -14,7 +14,7 @@
             </span>
 
             @can('add_edit_test_runs')
-                <div>
+                <div class="d-flex flex-wrap align-items-center">
                     <button class="btn btn-sm btn-outline-dark me-1" id="filter-button" title="Filter">
                         <i class="bi bi-funnel"></i>
                     </button>
@@ -27,6 +27,16 @@
                     <button class="btn btn-sm btn-outline-dark me-1" id="toggle-all-button" title="Collapse/Expand All">
                         <i class="bi bi-chevron-down"></i>
                     </button>
+
+                    @if ($containsLink)
+                    <!-- Bug Report Button -->
+                    <button class="btn btn-sm btn-outline-danger me-1" id="bug-report-button" title="Bug Report">
+                        <i class="bi bi-bug"></i>
+                    </button>
+                    @endif
+
+                    {{-- Подключаем overlay --}}
+                    @include('jira.bug_report_overlay')
                 </div>
             @endcan
 
@@ -148,5 +158,60 @@
         // Initially set collapsed state to false
         $("#toggle-all-button").data("collapsed", false);
     </script>
+    <script>
+            $(document).ready(function() {
+                // Получение описания из Blade-шаблона
+                var description = @json($testPlanDescription);
 
+                function extractIssueKey(description) {
+                    // Проверка на null или undefined
+                    if (!description) {
+                        return null; // Если description пустой, возвращаем null
+                    }
+                    // Регулярное выражение для извлечения ключа задачи
+                    var regex = /http:\/\/jira\.ab\.loc\/browse\/(\w+-\d+)/;
+                    var match = description.match(regex);
+                    return match ? match[1] : null;
+                }
+
+                // Получаем ключ задачи
+                var issueKey = extractIssueKey(description);
+                if (issueKey) {
+                    console.log("Issue Key:", issueKey);
+
+                    // Показать кнопку Bug Report и добавить обработчик клика
+                    var bugReportButton = document.getElementById('bug-report-button');
+                    if (bugReportButton) {
+                        bugReportButton.style.display = 'block';
+
+                        bugReportButton.addEventListener('click', function() {
+                            var issueKeyInput = document.querySelector('#issueKey');
+                            if (issueKeyInput) {
+                                issueKeyInput.value = issueKey;
+                            }
+
+                            // Открыть оверлей с формой багрепорта
+                            var overlay = document.querySelector('.overlay');
+                            if (overlay) {
+                                overlay.style.display = 'block';
+                            }
+                        });
+                    }
+                } else {
+                    console.log("Issue Key not found.");
+                }
+            });
+        </script>
+<style>
+#bug-report-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bug-report-button i {
+    pointer-events: none;
+}
+</style>
 @endsection

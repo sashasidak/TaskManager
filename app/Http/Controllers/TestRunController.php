@@ -121,6 +121,10 @@ class TestRunController extends Controller
             }
         }
 
+            // Проверка наличия ссылки в описании
+            $containsLink = strpos($testPlan->description, 'http://jira.ab.loc/browse/') !== false;
+
+
         return view('test_run.show_page')
             ->with('project', $project)
             ->with('testRun', $testRun)
@@ -130,8 +134,10 @@ class TestRunController extends Controller
             ->with('suites', $suites)
             ->with('testCasesIds', $testCasesIds)
             ->with('results', $results)
-            ->with('statusCounts', $statusCounts); // Добавляем сюда
-    }
+            ->with('statusCounts', $statusCounts)
+            ->with('containsLink', $containsLink)
+            ->with('testPlanDescription', $testPlan->description); // Передача описания
+}
 
     public function create($project_id)
     {
