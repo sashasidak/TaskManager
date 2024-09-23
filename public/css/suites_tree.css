@@ -1,22 +1,7 @@
 .branch-title {
-    /* Убираем ограничение на количество строк */
-    white-space: normal; /* Позволяет тексту переноситься на новую строку */
-    overflow: visible; /* Убедитесь, что текст не скрывается */
-    word-wrap: break-word; /* Переносит длинные слова на новую строку */
-    display: block; /* Делает элемент блочным, чтобы текст переносился корректно */
-}
-
-.hidden {
-    display: none;
-}
-
-.branch-link {
-    color: blue;
-    text-decoration: underline;
-}
-
-.branch-link:hover {
-    color: darkblue;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 *,

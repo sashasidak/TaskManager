@@ -52,18 +52,16 @@
 
         <div class="p-4 pt-0 position-relative">
 
-            @if(isset($data->preconditions) && !empty($data->preconditions))
-                <strong class="fs-5 pb-3">Preconditions</strong>
-                <div class="row mb-3 border p-3 rounded">
-                    <div>
-                        {!! preg_replace(
-                            '#\bhttps?://[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|/))#',
-                            '<a href="$0" target="_blank">$0</a>',
-                            $data->preconditions
-                        ) !!}
+                @if(isset( $data->preconditions) && !empty($data->preconditions) )
+                    <strong class="fs-5 pb-3">Preconditions</strong>
+                    <div class="row mb-3 border p-3 rounded">
+
+                        <div>
+                            {!! $data->preconditions !!}
+                        </div>
+
                     </div>
-                </div>
-            @endif
+                @endif
 
                 @if(isset($data->steps) && !empty($data->steps))
                     <strong class="fs-5 pb-3">Steps</strong>

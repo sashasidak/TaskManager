@@ -10,10 +10,6 @@ use \App\Http\Controllers\RepositoryController;
 use \App\Http\Controllers\DocumentsController;
 use \App\Http\Controllers\AuthController;
 use \App\Http\Controllers\UsersController;
-use App\Http\Controllers\SuiteReportController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\TaskCopyController;
-use App\Http\Controllers\JiraController;
 
 
 /**********************************************************************
@@ -93,11 +89,6 @@ Route::middleware(['auth'])->group(function () {
     /**********************************************************************
     // REPOSITORY
      ***********************************************************************/
-
-     Route::post('/copy-tasks/{sourceRepoId}/{targetRepoId}', [TaskCopyController::class, 'copyTasks'])->name('copy-tasks');
-     Route::get('/repositories/{repositoryId}/suites', [TaskCopyController::class, 'getSuitesByRepository']);
-     Route::get('/suites/{suiteId}/test-cases', [TaskCopyController::class, 'getTestCasesBySuite']);
-
 
     Route::get('/project/{project_id}/repositories', [RepositoryController::class, 'index'])
         ->where('project_id', '[0-9]+')
@@ -205,10 +196,6 @@ Route::middleware(['auth'])->group(function () {
     /*************************************
     // PROJECT TEST RUN PAGES
      *************************************/
-     Route::get('/project/{project_id}/test-run/{test_run_id}/generate-report', [ReportController::class, 'generateReport'])
-         ->where('project_id', '[0-9]+')
-         ->where('test_run_id', '[0-9]+')
-         ->name('generateReport');
 
     Route::get('/project/{project_id}/test-runs', [TestRunController::class, 'index'])
         ->where('project_id', '[0-9]+')
@@ -238,27 +225,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/trchart/{test_run_id}', [TestRunController::class, 'loadChart'])
         ->where('test_run_id', '[0-9]+');
 
-    Route::get('/project/{project_id}/test-run/{test_run_id}/generate-pdf/{suite_id}', [SuiteReportController::class, 'generatePdf'])
-        ->name('generatePdf');
-
 //Update test case status in results array
 
     Route::post('/trcs', [TestRunController::class, 'updateCaseStatus']);
 
-    Route::post('/test-plan/store', [TestPlanController::class, 'store'])->name('test_plan_store');
+    Route::post('/test-run/create', [TestRunController::class, 'store'])->name("test_run_create");
     Route::post('/test-run/update', [TestRunController::class, 'update'])->name("test_run_update");
     Route::post('/test-run/delete', [TestRunController::class, 'destroy'])->name("test_run_delete");
-
-     /**********************************************************************
-    // JIRA
-     ***********************************************************************/
-
-    Route::get('/jira-tasks', [JiraController::class, 'getCurrentUser'])->name('jira_tasks_page');
-    Route::get('/jira-dashboard/{project_id?}', [JiraController::class, 'dashboard'])->name('jira_dashboard');
-    Route::get('/jira/issue-estimate/{issueKey}', [JiraController::class, 'getIssueEstimate']);
-    Route::post('/jira/create-bug-report', [JiraController::class, 'createBugReport'])->name('jira.createBugReport');
-    Route::get('/jira/search-customer', [JiraController::class, 'searchCustomer'])->name('jira.searchCustomer');
-    Route::get('/jira/search-executor', [JiraController::class, 'searchExecutor'])->name('jira.searchExecutor');
 
 
     /**********************************************************************
@@ -290,3 +263,26 @@ Route::middleware(['auth'])->group(function () {
 
 
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

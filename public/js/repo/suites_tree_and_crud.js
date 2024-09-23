@@ -58,10 +58,7 @@ function showSuiteForm(operation, suite_id = null) {
         $('#tsf_title').text('Edit Test Suite');
         $('#tsf_update_btn').show();
         $('#tsf_create_btn').hide();
-
-        // Извлекаем оригинальный текст из атрибута title
-        const originalTitle = $(`#suite_title_${suite_id}`).attr('title');
-        suiteFormTitleInput.val(originalTitle);
+        suiteFormTitleInput.val(activeTreeSuiteItem.getTitle());
     }
 
     $('#test_suite_form_overlay').show();
@@ -168,13 +165,7 @@ function updateSuite() {
         },
 
         success: function (data) {
-            // Обработка текста перед обновлением на UI
-            const processedTitle = processSuiteTitle(suiteFormTitleInput.val());
-
-            // Обновляем текст и атрибут title на странице
-            $(`#suite_title_${activeTreeSuiteItem.getId()}`).html(processedTitle);
-            $(`#suite_title_${activeTreeSuiteItem.getId()}`).attr('title', suiteFormTitleInput.val());
-
+            $(`#suite_title_${activeTreeSuiteItem.getId()}`).text(suiteFormTitleInput.val());
             $('#test_cases_list_site_title').text(suiteFormTitleInput.val());
             closeSuiteForm();
         }
@@ -293,13 +284,3 @@ let activeTreeSuiteItem = {
         this.getElement().find('.branch-wrapper').addClass('selected');
     }
 };
-
-/**************************************************
- * Обработка ссылки в тексте
- *************************************************/
-function processSuiteTitle(title) {
-    const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
-    return title.replace(urlPattern, (match, fullUrl, protocol, shortUrl) => {
-        return `<a href="${fullUrl}" class="branch-link" target="_blank">${shortUrl}</a>`;
-    });
-}

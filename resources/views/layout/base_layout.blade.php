@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>àbank24TMS - Open Source Test Management Tool</title>
+    <title>ABankTMS - Open Source Test Management Tool</title>
 
     <link rel="icon" type="image/x-icon" href="{{asset('/img/favicon.ico')}}">
 

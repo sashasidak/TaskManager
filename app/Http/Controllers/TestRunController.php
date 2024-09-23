@@ -26,56 +26,14 @@ class TestRunController extends Controller
      *  PAGES
      *****************************************/
 
-    public function index($projectId)
+    public function index($project_id)
     {
-        // Найти проект и получить все тестовые запуски
-        $project = Project::findOrFail($projectId);
-        $testRuns = TestRun::where('project_id', $projectId)
-                        ->orderBy('created_at', 'DESC') // Добавляем сортировку
-                        ->get();
-        // Инициализируем массив для хранения статусов тестов для каждого тестового запуска
-        $testRunStatusCounts = [];
+        $project = Project::findOrFail($project_id);
+        $testRuns = TestRun::with('testPlan')->where('project_id', $project->id)->orderBy('created_at', 'DESC')->get();
 
-        foreach ($testRuns as $testRun) {
-            $testPlan = TestPlan::findOrFail($testRun->test_plan_id);
-            $testCasesIds = explode(',', $testPlan->data);
-            $results = $testRun->getResults();
-
-            // Подсчитать количество тест-кейсов по статусам
-            $statusCounts = [
-                'passed' => 0,
-                'failed' => 0,
-                'blocked' => 0,
-                'not_tested' => 0,
-            ];
-
-            foreach ($testCasesIds as $testCaseId) {
-                $status = $results[$testCaseId] ?? 4;
-                switch ($status) {
-                    case 1:
-                        $statusCounts['passed']++;
-                        break;
-                    case 2:
-                        $statusCounts['failed']++;
-                        break;
-                    case 3:
-                        $statusCounts['blocked']++;
-                        break;
-                    case 4:
-                        $statusCounts['not_tested']++;
-                        break;
-                }
-            }
-
-            // Сохранить в массиве результаты
-            $testRunStatusCounts[$testRun->id] = $statusCounts;
-        }
-
-        return view('test_run.list_page', [
-            'project' => $project,
-            'testRuns' => $testRuns,
-            'testRunStatusCounts' => $testRunStatusCounts,
-        ]);
+        return view('test_run.list_page')
+            ->with('project', $project)
+            ->with('testRuns', $testRuns);
     }
 
     public function show($project_id, $test_run_id)
@@ -95,36 +53,6 @@ class TestRunController extends Controller
 
         $results = $testRun->getResults();
 
-        // Подсчитать количество тестов по статусам
-        $statusCounts = [
-            'passed' => 0,
-            'failed' => 0,
-            'blocked' => 0,
-            'not_tested' => 0,
-        ];
-
-        foreach ($testCasesIds as $testCaseId) {
-            $status = $results[$testCaseId] ?? 4;
-            switch ($status) {
-                case 1:
-                    $statusCounts['passed']++;
-                    break;
-                case 2:
-                    $statusCounts['failed']++;
-                    break;
-                case 3:
-                    $statusCounts['blocked']++;
-                    break;
-                case 4:
-                    $statusCounts['not_tested']++;
-                    break;
-            }
-        }
-
-            // Проверка наличия ссылки в описании
-            $containsLink = strpos($testPlan->description, 'http://jira.ab.loc/browse/') !== false;
-
-
         return view('test_run.show_page')
             ->with('project', $project)
             ->with('testRun', $testRun)
@@ -133,11 +61,8 @@ class TestRunController extends Controller
             ->with('testSuitesTree', $testSuitesTree)
             ->with('suites', $suites)
             ->with('testCasesIds', $testCasesIds)
-            ->with('results', $results)
-            ->with('statusCounts', $statusCounts)
-            ->with('containsLink', $containsLink)
-            ->with('testPlanDescription', $testPlan->description); // Передача описания
-}
+            ->with('results', $results);
+    }
 
     public function create($project_id)
     {

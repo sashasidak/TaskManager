@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
-
 {
     /*****************************************
      *  PAGES
@@ -79,9 +78,9 @@ class ProjectController extends Controller
         // create default test repository
         $repository = new Repository();
         $repository->project_id = $project->id;
-        $repository->title = "Regress";
-        $repository->prefix = "R";
-        $repository->description = "Default Regress Repository";
+        $repository->title = "Default";
+        $repository->prefix = "D";
+        $repository->description = "Default Test Repository. Test suites and test cases are located here";
         $repository->save();
 
 
