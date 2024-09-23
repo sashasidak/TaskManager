@@ -20,9 +20,8 @@
                 <div class="mb-3 d-flex justify-content-start border p-3 bg-light">
 
                     <div>
-                       <!-- Класс hidden добавлен здесь чтобы скрыть кнопку.. пока не вижу нужды для нас -->
-                        <label for="test_suite_id" class="form-label hidden"><strong>Test Suite</strong></label>
-                        <select name="suite_id" id="tce_test_suite_select" class="form-select border-secondary hidden">
+                        <label for="test_suite_id" class="form-label"><strong>Test Suite</strong></label>
+                        <select name="suite_id" id="tce_test_suite_select" class="form-select border-secondary">
 
                             @foreach($repository->suites as $repoTestSuite)
                                 <option value="{{$repoTestSuite->id}}"

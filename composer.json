@@ -12,7 +12,6 @@
         "ext-dom": "*",
         "ext-json": "*",
         "ext-libxml": "*",
-        "barryvdh/laravel-snappy": "^1.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^9.0",

@@ -20,9 +20,8 @@
                 <div class="mb-3 d-flex justify-content-start border p-3 bg-light">
 
                     <div>
-                                    <!-- Класс hidden добавлен здесь чтобы скрыть кнопку.. пока не вижу нужды для нас -->
-                        <label for="test_suite_id" class="form-label hidden"><strong>Test Suite</strong></label>
-                        <select name="suite_id" id="tce_test_suite_select" class="form-select border-secondary hidden">
+                        <label for="test_suite_id" class="form-label"><strong>Test Suite</strong></label>
+                        <select name="suite_id" id="tce_test_suite_select" class="form-select border-secondary">
 
                             @foreach($repository->suites as $repoTestSuite)--}}
 
@@ -63,7 +62,7 @@
                     <div>
                         <label class="form-label"><b>Type</b> </label>
                         <select name="automated" class="form-select border-secondary" id="tce_automated_select">
-                            @if($testCase->automated)
+                            @if($testCase->automated)--}}
                                 <option value="0"> Manual</option>
                                 <option value="1" selected>Automated</option>
                             @else
@@ -76,7 +75,7 @@
                     <div class="mx-4">
                         <label class="form-label"><b>Need on Smoke</b> </label>
                         <select name="need_on_smoke" class="form-select border-secondary" id="tcc_need_on_smoke_select">
-                            @if($testCase->need_on_smoke)
+                            @if($testCase->need_on_smoke)--}}
                                 <option value="0"> No</option>
                                 <option value="1" selected>Yes</option>
                             @else
@@ -199,3 +198,7 @@
     </div>
 
 </div>
+
+
+
+

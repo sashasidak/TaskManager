@@ -120,15 +120,7 @@ class TestPlanController extends Controller
 
         $testPlan->save();
 
-        // Создание тест-рана и привязка его к тест-плану
-        $testRun = new TestRun();
-        $testRun->title = $testPlan->title;
-        $testRun->test_plan_id = $testPlan->id;
-        $testRun->project_id = $testPlan->project_id;
-        $testRun->data = $testRun->getInitialData();
-        $testRun->save();
-
-        return redirect()->route('test_run_show_page', [$testPlan->project_id, $testRun->id]);
+        return redirect()->route('test_plan_list_page', $request->project_id);
     }
 
     public function update(Request $request)
@@ -137,13 +129,8 @@ class TestPlanController extends Controller
             abort(403);
         }
 
-    // Находим тест план по его ID
         $testPlan = TestPlan::findOrFail($request->id);
 
-    // Сохраняем старое название тест плана
-        $oldTitle = $testPlan->title;
-
-    // Обновляем тест план новыми данными
         $testPlan->title = $request->title;
         $testPlan->description = $request->description;
         $testPlan->repository_id = $request->repository_id;
@@ -151,20 +138,8 @@ class TestPlanController extends Controller
 
         $testPlan->save();
 
-    // Обновляем название тест ранов, ассоциированных с тест планом
-        TestRun::where('test_plan_id', $testPlan->id)
-        ->update([
-            'title' => $testPlan->title,
-        ]);
-    // Получаем первый тест-ран, привязанный к тест-плану
-        $testRun = TestRun::where('test_plan_id', $testPlan->id)->first();
-
-    // Проверяем, есть ли привязанный тест-ран, и делаем редирект на его страницу
-        if ($testRun) {
-        return redirect()->route('test_run_show_page', [$testPlan->project_id, $testRun->id])->with('success', 'Test Plan updated successfully');
+        return redirect()->route('test_plan_update_page', [$request->project_id, $request->id]);
     }
-    return redirect()->route('test_run_list_page', [$request->project_id, $request->id]);
-}
 
     public function destroy(Request $request)
     {
@@ -175,7 +150,7 @@ class TestPlanController extends Controller
         $testPlan = TestPlan::findOrFail($request->id);
         $project_id = $testPlan->project_id;
         $testPlan->delete();
-        return redirect()->route('test_run_list_page', $project_id);
+        return redirect()->route('test_plan_list_page', $project_id);
     }
 
     /*****************************************

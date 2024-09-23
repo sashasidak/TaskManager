@@ -2,6 +2,7 @@
 
 @section('head')
     <link rel="stylesheet" href="{{asset('css/suites_tree.css')}}">
+
     <link href="{{asset('editor/summernote-repo.css')}}" rel="stylesheet">
     <script src="{{asset('editor/summernote-lite.min.js')}}"></script>
 @endsection
@@ -33,19 +34,10 @@
                     </a>
                 @endcan
 
-                @can('add_edit_repositories')
-                    <button class="btn btn-sm btn-outline-dark me-1" id="filter-button" title="Filter">
-                        <i class="bi bi-funnel"></i>
-                    </button>
-                @endcan
             </div>
         </div>
 
-        <div id="filter-input-container" style="display: none; margin-bottom: 10px;">
-            <input type="text" id="filter-input" class="form-control" placeholder="Введите для фильтрации...">
-        </div>
-
-        {{-- <button type="button" class="btn btn-outline-dark btn-sm w-100">ROOT</button> --}}
+        {{--        <button type="button" class="btn btn-outline-dark btn-sm w-100">ROOT</button>--}}
 
         <ul id="tree">
             <li></li>
@@ -116,25 +108,13 @@
     <script src="{{asset('/js/repo/repository.js')}}"></script>
 
     <script>
-        $(document).ready(function() {
-            $("#filter-button").click(function() {
-                $("#filter-input-container").toggle(); // Переключение видимости контейнера с фильтром
-            });
 
-            $("#filter-input").on('input', function() {
-                let searchTerm = $(this).val().toLowerCase();
+        $("#test_cases_list").sortable({
+            update: function (e, u) {
 
-                $(".branch-title").each(function() {
-                    let suiteTitle = $(this).text().toLowerCase();
-
-                    // Проверяем совпадение в заголовке suite
-                    if (suiteTitle.includes(searchTerm)) {
-                        $(this).closest('li').show(); // Показываем родительский элемент <li>
-                    } else {
-                        $(this).closest('li').hide(); // Скрываем родительский элемент <li>
-                    }
-                });
-            });
+            }
         });
+
     </script>
+
 @endsection

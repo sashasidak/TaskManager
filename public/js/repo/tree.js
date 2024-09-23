@@ -90,15 +90,6 @@ function TreeSortable() {
                 },
                 cleanSelector,
             } = treeSortable;
-
-            // Обрабатываем URL в тексте
-            const urlPattern = /(\b(https?|ftp|file):\/\/jira\.ab\.loc\/browse\/(\w+-\d+))/gi;
-            const processedTitle = title.replace(urlPattern, (match, fullUrl, protocol, shortUrl) => {
-                // Создаем укороченный текст для отображения
-                const shortenedText = shortUrl; // Например, A24MOB-33433
-                // Возвращаем HTML с укороченной ссылкой и полной ссылкой для перехода
-                return `<a href="${fullUrl}" class="branch-link" target="_blank">${shortenedText}</a>`;
-            });
             return `
 		<li class="${cleanSelector(
             branchSelector
@@ -118,9 +109,7 @@ function TreeSortable() {
                         <div class="${cleanSelector(dragHandlerSelector)}">
                             <i class="bi bi-arrows-move text-muted"></i>
                         </div>
-                        <span id="suite_title_${mid ? mid : id}" class="branch-title" title="${title}">
-                            ${processedTitle}
-                        </span>
+                        <span id="suite_title_${mid ? mid : id}" class="branch-title" title="${title}">${title}</span>
                     </div>
 
                     <div class="right-sidebar d-flex justify-content-end position-absolute end-0">

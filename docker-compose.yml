@@ -4,12 +4,12 @@ volumes:
   database-volume:
     driver_opts:
       type: none
-      device: /Users/admin/docker_data/quara/db
+      device: /data/quara/db
       o: bind
   app-volume:
     driver_opts:
       type: none
-      device: /Users/admin/docker_data/quara/app
+      device: /data/quara/app
       o: bind
 
 
