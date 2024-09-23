@@ -95,8 +95,14 @@
                 <input type="file" id="attachments" name="attachments[]" multiple class="form-control-file">
             </div>
 
-            <!-- Кнопка для отправки формы -->
-            <button type="submit" class="btn btn-primary">Отправить отчет</button>
+           <button type="submit" class="btn btn-primary">
+               Отправить отчет
+               <div id="loader" style="display: none; margin-left: 10px;">
+                   <div class="spinner-border spinner-border-sm" role="status">
+                       <span class="sr-only">Загрузка...</span>
+                   </div>
+               </div>
+           </button>
         </form>
     </div>
 </div>
@@ -341,12 +347,16 @@ $(document).ready(function() {
         var form = $(this);
         var formData = new FormData(form[0]);
 
+        // Показываем прелоадер внутри кнопки
+        $('#loader').show();
+        $('.btn-primary').addClass('loading'); // Добавляем класс loading к кнопке
+
         // Пример AJAX запроса для отправки данных формы
         $.ajax({
             url: form.attr('action'),
             method: form.attr('method'),
             data: formData,
-                dataType: 'json', // Добавьте это для явного указания ожидаемого типа данных
+            dataType: 'json', // Явное указание ожидаемого типа данных
             processData: false,
             contentType: false,
             beforeSend: function() {
@@ -362,6 +372,9 @@ $(document).ready(function() {
             },
             complete: function() {
                 isSubmitting = false; // Сбрасываем флаг отправки после завершения запроса
+                // Скрываем прелоадер
+                $('#loader').hide();
+                $('.btn-primary').removeClass('loading'); // Убираем класс loading
             }
         });
     });
@@ -486,6 +499,15 @@ $(document).ready(function() {
     padding: 10px 20px; /* Отступы кнопки */
     border-radius: 4px; /* Скругление углов кнопки */
 }
+.btn .spinner-border {
+    display: none; /* Скрываем прелоадер по умолчанию */
+}
 
+.btn.loading .spinner-border {
+    display: inline-block; /* Показываем прелоадер при загрузке */
+}
 
+.btn.loading {
+    pointer-events: none; /* Отключаем взаимодействие с кнопкой во время загрузки */
+}
 </style>
