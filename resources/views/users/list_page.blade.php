@@ -10,11 +10,9 @@
             <h3 class="page_title">
                 Users
 
-                @can('manage_users')
                     <a class="mx-3" href="{{route('users_create_page')}}">
                         <button type="button" class="btn btn-sm btn-primary"> <i class="bi bi-plus-lg"></i> Add User</button>
                     </a>
-                @endcan
             </h3>
         </div>
 
@@ -27,7 +25,6 @@
                         <a href="mailto:{{$user->email}}">{{$user->email}}</a>
                     </div>
 
-                    @can('manage_users')
                     <div class="d-flex justify-content-start">
 
                         <a href="{{route('users_edit_page', $user->id)}}" class="btn btn-sm btn-outline-dark">
@@ -45,7 +42,6 @@
                             </button>
                         </form>
                     </div>
-                    @endcan
 
                 </div>
 

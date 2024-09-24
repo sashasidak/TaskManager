@@ -18,18 +18,12 @@ class UsersController extends Controller
 
     public function create()
     {
-        if(!auth()->user()->can('manage_users')) {
-            abort(403);
-        }
 
         return view('users.create_page');
     }
 
     public function edit($user_id)
     {
-        if(!auth()->user()->can('manage_users')) {
-            abort(403);
-        }
 
         $user = User::findOrFail($user_id);
 
@@ -39,9 +33,6 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
-        if(!auth()->user()->can('manage_users')) {
-            abort(403);
-        }
 
         $request->validate([
             'name' => 'required',
@@ -64,9 +55,6 @@ class UsersController extends Controller
 
     public function update(Request $request)
     {
-        if(!auth()->user()->can('manage_users')) {
-            abort(403);
-        }
 
         $user = User::findOrFail($request->user_id);
 
@@ -92,9 +80,6 @@ class UsersController extends Controller
 
     public function destroy(Request $request)
     {
-        if(!auth()->user()->can('manage_users')) {
-            abort(403);
-        }
 
         $user = User::findOrFail($request->user_id);
         $user->delete();

@@ -9,13 +9,11 @@
             <h3 class="page_title">
                 Test Plans
 
-                @can('add_edit_test_plans')
                     <a class="mx-3" href="{{ route('test_plan_create_page', $project->id) }}">
                         <button type="button" class="btn btn-sm btn-primary">
                             <i class="bi bi-plus-lg"></i> New Test Plan
                         </button>
                     </a>
-                @endcan
             </h3>
         </div>
 
@@ -53,19 +51,15 @@
 
                         <div class="d-flex justify-content-end align-items-end border-top py-2">
                             <div>
-                                @can('add_edit_test_runs')
                                     <a href="{{ route('start_new_test_run', $testPlan->id) }}" class="link-light btn btn-sm btn-success">
                                         <i class="bi bi-play-circle"></i>
                                         Start new test run
                                     </a>
-                                @endcan
 
-                                @can('add_edit_test_plans')
                                     <a href="{{ route('test_plan_update_page', [$project->id, $testPlan->id]) }}" class="btn btn-sm btn-outline-dark mx-3">
                                         <i class="bi bi-pencil"></i>
                                         Edit
                                     </a>
-                                @endcan
                             </div>
                         </div>
                     </div>

@@ -18,26 +18,20 @@
             </span>
 
             <div>
-                @can('add_edit_test_suites')
                     <button id="add_root_suite_btn" class="btn btn-primary btn-sm" type="button" title="Add Test Suite"
                             onclick="showSuiteForm('create')">
                         <i class="bi bi-plus-lg"></i> Test Suite
                     </button>
-                @endcan
 
-                @can('add_edit_repositories')
                     <a href="{{route('repository_edit_page', [$project->id, $repository->id])}}"
                        class="btn btn-sm btn-outline-dark me-1"
                        title="Repository Settings">
                         <i class="bi bi-gear"></i>
                     </a>
-                @endcan
 
-                @can('add_edit_repositories')
                     <button class="btn btn-sm btn-outline-dark me-1" id="filter-button" title="Filter">
                         <i class="bi bi-funnel"></i>
                     </button>
-                @endcan
             </div>
         </div>
 
@@ -67,12 +61,10 @@
                 </span>
                 </div>
 
-                @can('add_edit_test_cases')
                     <button class="btn btn-primary btn-sm mx-2" type="button" title="Add Test Case"
                             onclick="loadTestCaseCreateForm()">
                         <i class="bi bi-plus-lg"></i> Test Case
                     </button>
-                @endcan
             </div>
 
         </div>

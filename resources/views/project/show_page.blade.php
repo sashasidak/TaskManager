@@ -10,12 +10,10 @@
         <h3 class="page_title">Dashboard</h3>
 
         <div>
-            @can('add_edit_projects')
                 <a href="{{route('project_edit_page', $project->id)}}" class="btn btn-sm btn-secondary">
                     <i class="bi bi-gear"></i>
                     Settings
                 </a>
-            @endcan
         </div>
     </div>
 
@@ -93,19 +91,15 @@
         <h3 class="page_title">
             Repositories
 
-            @can('add_edit_repositories')
                 <a class="mx-3" href="{{route("repository_create_page", $project->id)}}">
                     <button type="button" class="btn btn-sm btn-primary"> <i class="bi bi-plus-lg"></i> Add New</button>
                 </a>
-            @endcan
         </h3>
     </div>
 
-    @can('add_edit_repositories')
         <div class="border-bottom my-3">
             <input type="text" id="repository_filter" class="form-control" placeholder="Filter repositories...">
         </div>
-    @endcan
 
     <div class="row row-cols-3 g-3" id="repositories_list">
         @foreach($repositories as $repository)

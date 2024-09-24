@@ -17,9 +17,6 @@ class TestSuiteController extends Controller
 
     public function updateParent(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_suites')) {
-            abort(403);
-        }
 
         $testSuite = Suite::findOrFail($request->id);
         $testSuite->parent_id = $request->parent_id;
@@ -28,9 +25,6 @@ class TestSuiteController extends Controller
 
     public function updateOrder(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_suites')) {
-            abort(403);
-        }
 
         foreach($request->order as $data){
             $testSuite = Suite::findOrFail($data['id']);
@@ -82,9 +76,6 @@ class TestSuiteController extends Controller
 
     public function store(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_suites')) {
-            abort(403);
-        }
 
         $suite = new Suite();
 
@@ -101,9 +92,6 @@ class TestSuiteController extends Controller
 
     public function update(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_suites')) {
-            abort(403);
-        }
 
         $testSuite = Suite::findOrFail($request->id);
 
@@ -120,9 +108,6 @@ class TestSuiteController extends Controller
 
     public function destroy(Request $request)
     {
-        if(!auth()->user()->can('delete_test_suites')) {
-            abort(403);
-        }
 
         $testSuite = Suite::findOrFail($request->id);
         $testSuite->delete();

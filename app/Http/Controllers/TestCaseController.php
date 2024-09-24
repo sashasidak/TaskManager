@@ -14,9 +14,6 @@ class TestCaseController extends Controller
 {
     public function store(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_cases')) {
-            abort(403);
-        }
 
         $testCase = new TestCase();
 
@@ -43,9 +40,6 @@ class TestCaseController extends Controller
 
     public function update(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_cases')) {
-            abort(403);
-        }
 
         $testCase = TestCase::findOrFail($request->id);
 
@@ -71,9 +65,6 @@ class TestCaseController extends Controller
 
     public function destroy(Request $request)
     {
-        if(!auth()->user()->can('delete_test_cases')) {
-            abort(403);
-        }
 
         $testCase = TestCase::findOrFail($request->id);
         $testCase->delete();

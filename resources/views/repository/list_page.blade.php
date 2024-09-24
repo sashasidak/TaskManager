@@ -10,7 +10,6 @@
        <h3 class="page_title">
            Repositories
 
-           @can('add_edit_repositories')
                <a class="mx-3" href="{{ route('repository_create_page', $project->id) }}">
                    <button type="button" class="btn btn-sm btn-primary">
                        <i class="bi bi-plus-lg"></i> Add New
@@ -21,7 +20,6 @@
                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#copyTasksModal">
                    <i class="bi bi-arrow-right"></i> Copy Tasks
                </button>
-           @endcan
        </h3>
    </div>
 

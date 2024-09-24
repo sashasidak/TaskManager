@@ -15,7 +15,6 @@
             </h3>
 
             <div>
-                @can('delete_repositories')
                     <form method="POST" action="{{route("repository_delete")}}">
                         @csrf
                         <input type="hidden" name="id" value="{{$repository->id}}">
@@ -26,7 +25,6 @@
                             Delete
                         </button>
                     </form>
-                @endcan
         </div>
 
         </div>
