@@ -43,10 +43,12 @@
             All Projects
         </a>
 
+        {{--
         <a href="{{ route('users_list_page') }}" class="nav-link text-white">
             <i class="bi bi-people-fill"></i>
             Users
         </a>
+        --}}
 
         <hr>
 
@@ -65,7 +67,7 @@
         <hr>
 
         <div class="text-center text-white mt-4">
-            <small>Version 3.16.6</small>
+            <small>Version 3.17.6</small>
         </div>
 
     </div>

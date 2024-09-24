@@ -141,9 +141,6 @@ class TestRunController extends Controller
 
     public function create($project_id)
     {
-        if(!auth()->user()->can('add_edit_test_runs')) {
-            abort(403);
-        }
 
         $project = Project::findOrFail($project_id);
         $testPlans = TestPlan::all();
@@ -155,9 +152,6 @@ class TestRunController extends Controller
 
     public function edit($project_id, $test_run_id)
     {
-        if(!auth()->user()->can('add_edit_test_runs')) {
-            abort(403);
-        }
 
         $project = Project::findOrFail($project_id);
         $testRun = TestRun::findOrFail($test_run_id);
@@ -185,9 +179,6 @@ class TestRunController extends Controller
 
     public function store(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_runs')) {
-            abort(403);
-        }
 
         $request->validate([
             'title' => 'required',
@@ -206,9 +197,6 @@ class TestRunController extends Controller
 
     public function update(Request $request)
     {
-        if(!auth()->user()->can('add_edit_test_runs')) {
-            abort(403);
-        }
 
         $testRun = TestRun::findOrFail($request->id);
 
@@ -220,9 +208,6 @@ class TestRunController extends Controller
 
     public function destroy(Request $request)
     {
-        if(!auth()->user()->can('delete_test_runs')) {
-            abort(403);
-        }
 
         $testRun = TestRun::findOrFail($request->id);
         $testRun->delete();

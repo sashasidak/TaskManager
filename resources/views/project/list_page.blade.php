@@ -11,11 +11,9 @@
             <h3 class="page_title">
                 Projects
 
-                @can('add_edit_projects')
                     <a  href="{{route("project_create_page")}}" >
                         <button type="button" class="btn btn-primary"> <i class="bi bi-plus-lg"></i> Create new project</button>
                     </a>
-                @endcan
 
             </h3>
         </div>

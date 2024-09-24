@@ -39,12 +39,10 @@
 
         <div style="min-width: 70px" class="justify-content-end">
 
-            @can('add_edit_test_cases')
                 <button type="button" class="btn btn-outline-dark btn-sm"
                         onclick="renderTestCaseEditForm({{$testCase->id}})">
                     <i class="bi bi-pencil"></i>
                 </button>
-            @endcan
 
             <button href="button" class="btn btn-outline-dark btn-sm" onclick="closeTestCaseEditor()">
                 <i class="bi bi-x-lg"></i>

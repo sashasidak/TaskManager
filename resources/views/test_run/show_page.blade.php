@@ -13,7 +13,6 @@
                 {{$testRun->title}}
             </span>
 
-            @can('add_edit_test_runs')
                 <div class="d-flex flex-wrap align-items-center">
                     <button class="btn btn-sm btn-outline-dark me-1" id="filter-button" title="Filter">
                         <i class="bi bi-funnel"></i>
@@ -38,7 +37,6 @@
                     {{-- Подключаем overlay --}}
                     @include('jira.bug_report_overlay')
                 </div>
-            @endcan
 
         </div>
 

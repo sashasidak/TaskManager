@@ -14,7 +14,6 @@
                 {{$testPlan->title}}
             </h3>
 
-            @can('delete_test_plans')
                 <form method="POST" action={{route("test_plan_delete")}}>
                     @csrf
                     <input type="hidden" name="project_id" value="{{$project->id}}">
@@ -24,7 +23,6 @@
                         Delete
                     </button>
                 </form>
-            @endcan
 
         </div>
 

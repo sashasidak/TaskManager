@@ -47,11 +47,11 @@
                     </a>
 
 
-                    <a href="{{route('users_list_page')}}" class="nav-link text-white">
+                  {{--  <a href="{{route('users_list_page')}}" class="nav-link text-white">
                         <i class="bi bi-people-fill"></i>
                         Users
                     </a>
-
+--}}
                 @endif
 
             </div>

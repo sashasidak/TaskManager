@@ -60,9 +60,6 @@ class RepositoryController extends Controller
 
     public function create($project_id)
     {
-        if(!auth()->user()->can('add_edit_repositories')) {
-            abort(403);
-        }
 
         $project = Project::findOrFail($project_id);
         return view('repository.create_page')
@@ -83,9 +80,6 @@ class RepositoryController extends Controller
 
     public function edit($project_id, $repository_id)
     {
-        if(!auth()->user()->can('add_edit_repositories')) {
-            abort(403);
-        }
 
         $project = Project::findOrFail($project_id);
         $repository = Repository::findOrFail($repository_id);
@@ -101,9 +95,6 @@ class RepositoryController extends Controller
 
     public function store(Request $request)
     {
-        if(!auth()->user()->can('add_edit_repositories')) {
-            abort(403);
-        }
 
         $request->validate([
             'title' => 'required',
@@ -124,9 +115,6 @@ class RepositoryController extends Controller
 
     public function update(Request $request)
     {
-        if(!auth()->user()->can('add_edit_repositories')) {
-            abort(403);
-        }
 
         $repository = Repository::findOrFail($request->id);
 
@@ -142,9 +130,6 @@ class RepositoryController extends Controller
 
     public function destroy(Request $request)
     {
-        if(!auth()->user()->can('delete_repositories')) {
-            abort(403);
-        }
 
         $repository = Repository::findOrFail($request->id);
         $repository->delete();
