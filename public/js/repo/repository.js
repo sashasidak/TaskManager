@@ -2,26 +2,30 @@
  * LOAD SCRIPTS
  *************************************************/
 
-$.getScript('/js/repo/tree.js', function() {});
-$.getScript('/js/repo/suites_tree_and_crud.js', function() {});
-$.getScript('/js/repo/case_crud.js', function() {});
+$.getScript('/js/repo/tree.js')
+    .done(function() {
+        const sortable = new TreeSortable(); // Создайте экземпляр только после успешной загрузки
 
-/**************************************************
- * RENDER SUITES TREE
- * and select first available suite
- * when all scripts are loaded
- *************************************************/
-
-$.getScript('/js/repo/case_editor.js', function() {
-    try {
-        loadSuitesTree();
-    }
-    catch (e) {
-        setTimeout(function() {
-            loadSuitesTree();
-        }, 1000);
-    }
-});
+        // Теперь загружаем другие скрипты
+        $.getScript('/js/repo/suites_tree_and_crud.js')
+            .done(function() {
+                $.getScript('/js/repo/case_crud.js')
+                    .done(function() {
+                        $.getScript('/js/repo/case_editor.js', function() {
+                            try {
+                                loadSuitesTree();
+                            } catch (e) {
+                                setTimeout(function() {
+                                    loadSuitesTree();
+                                }, 1000);
+                            }
+                        });
+                    });
+            });
+    })
+    .fail(function() {
+        console.error('Failed to load tree.js');
+    });
 
 /**************************************************
  * Click on test suite - load suite test cases
@@ -86,7 +90,3 @@ function rec(suite_id) {
         rec(child_li.attr('data-mid'))
     }
 }
-
-
-
-
