@@ -88,11 +88,13 @@
                             <p class="mb-1 text-muted">{{ $issue['fields']['summary'] }}</p>
                             <!-- Размещаем версию, автора и статус в один ряд с помощью Flexbox -->
                             <div class="d-flex flex-wrap align-items-center">
-                                <!-- Вывод версии -->
+                                <!-- Вывод версий -->
                                 <small class="me-3">
                                     <strong>Version:</strong>
                                     @if(!empty($issue['fields']['fixVersions']))
-                                        <span class="issue-version badge bg-light text-dark">{{ $issue['fields']['fixVersions'][0]['name'] }}</span>
+                                        @foreach($issue['fields']['fixVersions'] as $version)
+                                            <span class="issue-version badge bg-light text-dark">{{ $version['name'] }}</span>
+                                        @endforeach
                                     @else
                                         <span class="issue-version badge bg-secondary">No version specified</span>
                                     @endif
