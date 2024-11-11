@@ -1,6 +1,7 @@
 @extends('layout.base_layout')
 
 @section('head')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ asset('editor/summernote-lite.min.css') }}" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ asset('editor/summernote-lite.min.js') }}"></script>
@@ -194,15 +195,54 @@
             const projectId = button.getAttribute('data-project-id');
             const testRunId = button.getAttribute('data-test-run-id');
 
-            const url = `/project/${projectId}/test-run/${testRunId}/generate-report?reportType=${encodeURIComponent(reportType)}&smartphoneData=${encodeURIComponent(smartphoneData)}&comment=${encodeURIComponent(comment)}&description=${encodeURIComponent(description)}`;
-
-            // Закрываем модальное окно
-                var modal = bootstrap.Modal.getInstance(document.getElementById('pdfReportModal'));
-                if (modal) {
-                    modal.hide();
+            // Получаем CSRF-токен
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (!csrfToken) {
+                    console.error("CSRF токен не найден");
+                    return;
                 }
 
-            window.location.href = url;
+            // Создаем объект данных для отправки
+            const data = {
+                reportType: reportType,
+                smartphoneData: smartphoneData,
+                comment: comment,
+                description: description
+            };
+
+            // Закрываем модальное окно
+            const modal = bootstrap.Modal.getInstance(document.getElementById('pdfReportModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            // Выполняем POST-запрос
+            fetch(`/project/${projectId}/test-run/${testRunId}/generate-report`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob(); // Получаем PDF-файл как blob
+                } else {
+                    throw new Error('Ошибка генерации отчета');
+                }
+            })
+            .then(blob => {
+                // Скачиваем PDF-файл
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'report.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => console.error('Ошибка:', error));
         }
     </script>
     <script>

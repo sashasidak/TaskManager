@@ -79,13 +79,26 @@
         @if(!empty($issues))
             <ul class="list-group">
                 @foreach($issues as $issue)
-                    <!-- Стилизуем задачи в виде карточек с тенями -->
                     <li class="list-group-item justify-content-between align-items-center shadow-sm mb-3 p-3 rounded border border-light">
                         <div>
                             <h5 class="mb-1 fw-bold">
                                 <a href="http://jira.ab.loc/browse/{{ $issue['key'] }}" target="_blank" style="color: #007bff; text-decoration: none;">{{ $issue['key'] }}</a>
                             </h5>
-                            <p class="mb-1 text-muted">{{ $issue['fields']['summary'] }}</p>
+                            <p class="mb-1 text-muted">
+                                <!-- Добавляем иконку в зависимости от типа задачи -->
+                                @if (in_array($issue['fields']['issuetype']['name'], ['Невідповідність дизайну', 'Исправление ошибки (основной)', 'Ошибка']))
+                                    <i class="bi bi-bug-fill" style="color: #dc3545; font-size: 1.5rem;"></i>
+                                @elseif ($issue['fields']['issuetype']['name'] === 'Тестирование доработки (основной)')
+                                    <i class="bi bi-exclamation-triangle-fill" style="color: #ffc107; font-size: 1.5rem;"></i>
+                                @elseif ($issue['fields']['issuetype']['name'] === 'Задача')
+                                    <i class="bi bi-file-earmark-text" style="color: #007bff; font-size: 1.5rem;"></i>
+                                @elseif ($issue['fields']['issuetype']['name'] === 'Epic')
+                                    <i class="bi bi-cloud-lightning" style="color: #6f42c1; font-size: 1.5rem;"></i>
+                                @else
+                                    <i class="bi bi-file-earmark-text" style="color: #6c757d; font-size: 1.5rem;"></i>
+                                @endif
+                                {{ $issue['fields']['summary'] }}
+                            </p>
                             <!-- Размещаем версию, автора и статус в один ряд с помощью Flexbox -->
                             <div class="d-flex flex-wrap align-items-center">
                                 <!-- Вывод версий -->
