@@ -48,15 +48,15 @@ class RepositoryController extends Controller
      *  PAGES
      *****************************************/
 
-    public function index($project_id)
-    {
-        $project = Project::findOrFail($project_id);
-        $repositories = $project->repositories;
+   public function index($project_id)
+   {
+       $project = Project::findOrFail($project_id);
+       $repositories = $project->repositories()->orderBy('created_at', 'desc')->get();
 
-        return view('repository.list_page')
-            ->with('project', $project)
-            ->with('repositories', $repositories);
-    }
+       return view('repository.list_page')
+           ->with('project', $project)
+           ->with('repositories', $repositories);
+   }
 
     public function create($project_id)
     {

@@ -205,10 +205,10 @@ Route::middleware(['auth'])->group(function () {
     /*************************************
     // PROJECT TEST RUN PAGES
      *************************************/
-     Route::get('/project/{project_id}/test-run/{test_run_id}/generate-report', [ReportController::class, 'generateReport'])
-         ->where('project_id', '[0-9]+')
-         ->where('test_run_id', '[0-9]+')
-         ->name('generateReport');
+    Route::post('/project/{project_id}/test-run/{test_run_id}/generate-report', [ReportController::class, 'generateReport'])
+        ->where('project_id', '[0-9]+')
+        ->where('test_run_id', '[0-9]+')
+        ->name('generateReport');
 
     Route::get('/project/{project_id}/test-runs', [TestRunController::class, 'index'])
         ->where('project_id', '[0-9]+')
