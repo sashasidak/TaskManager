@@ -49,10 +49,11 @@
                                     <input type="text" id="smartphoneData" class="form-control" placeholder="Enter smartphone data...">
                                 </div>
 
-                                <!-- Existing field for comment -->
+                                <!-- Existing field for comment with maxlength -->
                                 <div class="mb-3">
                                     <label for="comment" class="form-label">Comment</label>
-                                    <textarea id="comment" class="form-control" rows="4" placeholder="Enter your comment here..."></textarea>
+                                    <textarea id="comment" class="form-control" rows="4" maxlength="1000" placeholder="Enter your comment here..."></textarea>
+                                    <small class="form-text text-muted">Maximum 1000 characters</small>
                                 </div>
                             </form>
                         </div>
